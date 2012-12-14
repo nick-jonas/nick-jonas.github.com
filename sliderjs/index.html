@@ -1,0 +1,64 @@
+<html>
+
+    <head>
+        <title>SliderJS</title>
+
+        <!-- include jquery -->
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+        <!-- include js plugin -->
+        <script type="text/javascript" src="slider.jquery.js"></script>
+
+        <!-- include necessary css for plugin -->
+        <link rel="stylesheet" href="slider.jquery.css"/>
+    </head>
+    <body>
+
+        <div id="slider"></div>
+
+        <button class="create" onClick="createSlider()" style="position:absolute; z-index:10; top:0px">Create</button>
+        <button class="destroy" onClick="destroySlider()" style="position:absolute; z-index:10; top: 30px;">Destroy</button>
+
+        <script type="text/javascript">
+
+            var $sl;
+
+            $(document).ready(function(){
+                createSlider();
+            });
+
+            function createSlider(){
+                if($sl) return;
+
+                // place slider in container
+                $sl = $('#slider').slider({
+                    'media': [
+                        'img/1.jpg',
+                        'img/2.jpg',
+                        'img/3.jpg',
+                        'img/4.jpg',
+                        'img/5.jpg',
+                        'img/6.jpg'
+                    ],
+                    'sizeConstraint': 'cover',
+                });
+
+                $sl.bind('slider:loadComplete', function(){
+                    console.log('loaded!');
+                });
+            }
+
+            function destroySlider(){
+                if($sl){
+                    $sl.destroy();
+                    $sl.unbind('slider:loadComplete');
+                    $sl = null;
+                }
+            }
+
+
+
+        </script>
+
+    </body>
+</html>
