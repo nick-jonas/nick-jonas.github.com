@@ -44,6 +44,8 @@
                 this.animationSpeed = 600;
                 this.topPadding = 0;
                 this.bottomPadding = 0;
+                this.minWidth = 0;
+                this.minHeight = 0;
                 this.preloaderPath = 'assets/img/ajax-loader.gif';
                 this.create = function(){
                     createSlider();
@@ -61,10 +63,12 @@
                 gui.add(controls, 'hideArrows');
                 gui.add(controls, 'enableKeys');
                 gui.add(controls, 'neighborOpacity').min(0).max(1).step(0.1);
-                gui.add(controls, 'animationSpeed');
+                gui.add(controls, 'animationSpeed').min(0);
                 gui.add(controls, 'neighborOpacity');
                 gui.add(controls, 'topPadding').min(0);
                 gui.add(controls, 'bottomPadding').min(0);
+                gui.add(controls, 'minWidth').min(0);
+                gui.add(controls, 'minHeight').min(0);
                 gui.add(controls, 'preloaderPath');
                 gui.add(controls, 'create');
                 gui.add(controls, 'destroy');
@@ -91,7 +95,9 @@
                     'animationSpeed': controls.animationSpeed,
                     'topPadding': controls.topPadding,
                     'bottomPadding': controls.bottomPadding,
-                    'preloaderPath': controls.preloaderPath
+                    'preloaderPath': controls.preloaderPath,
+                    'minWidth': controls.minWidth,
+                    'minHeight': controls.minHeight
                 });
 
                 $sl.bind('slider:loadComplete', function(){

@@ -26,7 +26,9 @@ var that = this,
             animationSpeed: 600,
             topPadding: 0,
             bottomPadding: 0,
-            preloaderPath: 'ajax-loader.gif'
+            preloaderPath: 'ajax-loader.gif',
+            minWidth: 0,
+            minHeight: 0
         },
         options = {},
         $container = {},
@@ -53,11 +55,6 @@ var that = this,
     function Plugin( element, customOptions ) {
         this.element = element;
 
-        // jQuery has an extend method that merges the
-        // contents of two or more objects, storing the
-        // result in the first object. The first object
-        // is generally empty because we don't want to alter
-        // the default options for future instances of the plugin
         options = options = $.extend( {}, defaults, customOptions) ;
 
         if(options.media.length === 0){
@@ -69,6 +66,9 @@ var that = this,
 
         isPercentWidth = options.width[options.width.length-1] === '%';
         isPercentHeight = options.height[options.width.length-1] === '%';
+
+        options.minWidth = parseInt(options.minWidth, 10);
+        options.minHeight = parseInt(options.minHeight, 10);
 
         _setCurrentIndex(options.startIndex);
 
@@ -418,13 +418,17 @@ var that = this,
         _sizeImage($container.find('.right-img img'));
     };
 
+    var centerImageWidth = 0;
     var _sizeImage = function( $img ){
         var w = _getContainerWidth(),
             h = _getContainerHeight(),
             browserRatio = w / h,
             theImage = new Image(),
+            sizing = {},
             naturalWidth,
             naturalHeight,
+            newWidth,
+            newHeight,
             imageRatio;
 
         // get natural width/height
@@ -433,36 +437,54 @@ var that = this,
         naturalHeight = theImage.height;
         imageRatio = naturalWidth / naturalHeight;
 
-        // scale center image
+        // scale image to fit completely in browser
         if(options.sizeConstraint === "contain"){
             if(browserRatio > imageRatio){
-                $img.css({height:_getContainerHeight(true), width: 'auto'});
+                newHeight = _getContainerHeight();
+                if(newHeight < options.minHeight) newHeight = options.minHeight;
+                newWidth = (newHeight / naturalHeight) * naturalWidth;
+                sizing = {height:newHeight, width: newWidth};
             }else{
-                $img.css({width:_getContainerWidth(true), height: 'auto'});
-            }
-        }else{
-            if(browserRatio < imageRatio){
-                $img.css({height:_getContainerHeight(true), width: 'auto'});
-            }else{
-                $img.css({width:_getContainerWidth(true), height: 'auto'});
+                newWidth = _getContainerWidth();
+                if(newWidth < options.minWidth) newWidth = options.minWidth;
+                newHeight = (newWidth / naturalWidth) * naturalHeight;
+                sizing = {width:newWidth, height: newHeight};
             }
         }
+        // scale image to fill browser
+        else{
+            if(browserRatio < imageRatio){ // browser is taller, match height of image to browser height
+                // apply minimum height value
+                newHeight = _getContainerHeight();
+                if(newHeight < options.minHeight) newHeight = options.minHeight;
+                // calculate width based on height
+                newWidth = (newHeight / naturalHeight) * naturalWidth;
+                sizing = {height:newHeight, width: newWidth};
+            }else{  // browser is wider, match width of image to browser height
+                // apply minimum width value
+                newWidth = _getContainerWidth();
+                if(newWidth < options.minWidth) newWidth = options.minWidth;
+                // calculate height based on width
+                newHeight = (newWidth / naturalWidth) * naturalHeight;
+                sizing = {width:newWidth, height: newHeight};
+            }
+        }
+
+        // store center image's width
+        if($img.parent().hasClass('center-img')){
+            centerImageWidth = newWidth;
+        }
+
+        // add 'px'
+        sizing.width = sizing.width + 'px';
+        sizing.height = sizing.height + 'px';
+
+        $img.css(sizing);
 
         // if image 'contain' to fit all in browser, vertically center
         if(options.sizeConstraint == 'contain'){
             $img.parent().css('top', Math.max(options.topPadding, ((h / 2) + $img.height() / -2)) + 'px');
         }
-
-        // get center image's width
-        var centerImage = new Image();
-        centerImage.src = $container.find('.center-img img').attr('src');
-        var centerImageWidth, ratio;
-        if(browserRatio > imageRatio){
-            ratio = $container.find('.center-img').height() / centerImage.height;
-        }else{
-            ratio = $container.find('.center-img').width() / centerImage.width;
-        }
-        centerImageWidth = centerImage.width * ratio;
 
         // place center image in middle
         if($img.parent().hasClass('center-img')) {
