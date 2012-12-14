@@ -3,44 +3,95 @@
     <head>
         <title>SliderJS</title>
 
-        <!-- include jquery -->
+        <!-- jquery -->
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 
-        <!-- include js plugin -->
-        <script type="text/javascript" src="slider.jquery.js"></script>
+        <!-- js plugin -->
+        <script type="text/javascript" src="assets/js/slider.jquery.js"></script>
 
-        <!-- include necessary css for plugin -->
-        <link rel="stylesheet" href="slider.jquery.css"/>
+        <!-- demo controls -->
+        <script type="text/javascript" src="assets/js/dat.gui.min.js"></script>
+
+        <!-- necessary css for plugin -->
+        <link rel="stylesheet" href="assets/css/slider.jquery.css"/>
+
+        <style>
+            /* place controls above */
+            .dg.ac{ z-index: 6 !important; }
+            .dg .slider{ margin-left:0px; }
+        </style>
+
     </head>
     <body>
 
         <div id="slider"></div>
 
-        <button class="create" onClick="createSlider()" style="position:absolute; z-index:10; top:0px">Create</button>
-        <button class="destroy" onClick="destroySlider()" style="position:absolute; z-index:10; top: 30px;">Destroy</button>
-
         <script type="text/javascript">
 
-            var $sl;
+            var $sl, controls;
 
             $(document).ready(function(){
+                createControls();
                 createSlider();
             });
 
+            var SliderControls = function(){
+                this.startIndex = 0;
+                this.sizeConstraint = "cover";
+                this.hideArrows = false;
+                this.enableKeys = true;
+                this.neighborOpacity =0.3;
+                this.animationSpeed = 600;
+                this.topPadding = 0;
+                this.bottomPadding = 0;
+                this.preloaderPath = 'assets/img/ajax-loader.gif';
+                this.create = function(){
+                    createSlider();
+                }
+                this.destroy = function(){
+                    destroySlider();
+                }
+            };
+
+            function createControls(){
+                controls = new SliderControls();
+                var gui = new dat.GUI();
+                gui.add(controls, 'startIndex');
+                gui.add(controls, 'sizeConstraint', ['cover', 'contain']);
+                gui.add(controls, 'hideArrows');
+                gui.add(controls, 'enableKeys');
+                gui.add(controls, 'neighborOpacity').min(0).max(1).step(0.1);
+                gui.add(controls, 'animationSpeed');
+                gui.add(controls, 'neighborOpacity');
+                gui.add(controls, 'topPadding').min(0);
+                gui.add(controls, 'bottomPadding').min(0);
+                gui.add(controls, 'preloaderPath');
+                gui.add(controls, 'create');
+                gui.add(controls, 'destroy');
+            }
+
             function createSlider(){
-                if($sl) return;
+                if($sl) destroySlider();
 
                 // place slider in container
                 $sl = $('#slider').slider({
                     'media': [
-                        'img/1.jpg',
-                        'img/2.jpg',
-                        'img/3.jpg',
-                        'img/4.jpg',
-                        'img/5.jpg',
-                        'img/6.jpg'
+                        'assets/img/1.jpg',
+                        'assets/img/2.jpg',
+                        'assets/img/3.jpg',
+                        'assets/img/4.jpg',
+                        'assets/img/5.jpg',
+                        'assets/img/6.jpg'
                     ],
-                    'sizeConstraint': 'cover',
+                    'startIndex': controls.startIndex,
+                    'sizeConstraint': controls.sizeConstraint,
+                    'hideArrows': controls.hideArrows,
+                    'enableKeys': controls.enableKeys,
+                    'neighborOpacity': controls.neighborOpacity,
+                    'animationSpeed': controls.animationSpeed,
+                    'topPadding': controls.topPadding,
+                    'bottomPadding': controls.bottomPadding,
+                    'preloaderPath': controls.preloaderPath
                 });
 
                 $sl.bind('slider:loadComplete', function(){
