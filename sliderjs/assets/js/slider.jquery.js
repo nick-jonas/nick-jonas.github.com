@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.1.0
+ * Version: 0.2.1
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -22,7 +22,6 @@ var that = this,
             enableKeys: true,
             width: '100%', // not mutable
             height: '100%', // not mutable
-            neighborOpacity:0.3,
             animationSpeed: 600,
             topPadding: 0,
             bottomPadding: 0,
@@ -37,6 +36,7 @@ var that = this,
         isLoadingRight = false,
         isPercentWidth = true,
         isPercentHeight = true,
+        isAnimating = false,
         leftIndex,
         rightIndex,
         currentIndex;
@@ -110,7 +110,7 @@ var that = this,
         $center = $('.center-img');
         $right = $('.right-img');
         $left.find('img').attr('src', _getImageUrl(leftIndex));
-        $center.find('img').attr('src', _getImageUrl(currentIndex));
+        $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
         $right.find('img').attr('src', _getImageUrl(rightIndex));
 
         setTimeout(function(){
@@ -176,6 +176,18 @@ var that = this,
         return isLoadingRight;
     };
 
+    $.fn.isAnimating = function(){
+        return isAnimating;
+    };
+
+    var canShiftLeft = $.fn.canShiftLeft = function(){
+        return (loaded && !isLoadingRight && !isAnimating);
+    };
+
+    var canShiftRight = $.fn.canShiftRight = function(){
+        return (loaded && !isLoadingLeft && !isAnimating);
+    };
+
     var shiftLeft = $.fn.shiftLeft = Plugin.prototype.shiftLeft = function(){
 
         var w = $(window).width(),
@@ -185,7 +197,8 @@ var that = this,
             x_diff = 0,
             containerPos = -w;
 
-        if(loaded && !isLoadingRight){
+        if(canShiftLeft()){
+            isAnimating = true;
             // change index
             currentIndex = currentIndex + 1;
             if(currentIndex >= options.media.length) currentIndex = 0;
@@ -203,12 +216,12 @@ var that = this,
             }
 
             $right.css('z-index', 5);
-            $right.find('img').fadeInSlide();
-            $center.find('img').fadeOutSlide();
 
             _onLoadNextImage();
 
-            $container.filter(':not(:animated)').animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+            $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+
+                isAnimating = false;
 
                 $container.css('left',  x_diff + 'px');
 
@@ -223,15 +236,20 @@ var that = this,
 
                 $newRight = $container.find('.right-img img');
                 $newCenter = $container.find('.center-img img');
-                if(options.sizeConstraint !== 'cover') $newRight.css('opacity', 0);
+                $newLeft = $container.find('.left-img img');
+
+                // replace with hi-res image
+                $newCenter.attr('src', _getHighResImageUrl(currentIndex));
+
                 $newRight.ensureLoad(function(){
                     _onLoadNextImageComplete();
                     loaded = true;
                     _sizeImage($(this));
-                    $(this).fadeOutSlide();
-                    $newCenter.fadeInSlide();
                 });
             });
+            return true;
+        }else{
+            return false;
         }
     };
 
@@ -244,7 +262,8 @@ var that = this,
             x_diff = 0,
             containerPos = w;
 
-        if(loaded && !isLoadingLeft){
+        if(canShiftRight()){
+            isAnimating = true;
             // change index
             currentIndex = currentIndex - 1;
             if(currentIndex < 0) currentIndex = options.media.length - 1;
@@ -264,10 +283,10 @@ var that = this,
             }
 
             $left.css('z-index', 5);
-            $left.find('img').fadeInSlide();
-            $center.find('img').fadeOutSlide();
 
-            $container.filter(':not(:animated)').animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+            $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+
+                isAnimating = false;
 
                 $container.css('left',  x_diff + 'px');
 
@@ -281,15 +300,20 @@ var that = this,
                 _sizeImages();
 
                 $newLeft = $container.find('.left-img img');
+                $newRight = $container.find('.right-img img');
                 $newCenter = $container.find('.center-img img');
-                if(options.sizeConstraint !== 'cover') $newLeft.css('opacity', 0);
+
+                // replace with hi-res image
+                $newCenter.attr('src', _getHighResImageUrl(currentIndex));
+
                 $newLeft.ensureLoad(function(){
                     _onLoadPreviousImageComplete();
                     _sizeImage($(this));
-                    $(this).fadeOutSlide();
-                    $newCenter.fadeInSlide();
                 });
             });
+            return true;
+        }else{
+            return false;
         }
     };
 
@@ -371,6 +395,9 @@ var that = this,
         $('.arrow-container.right').html('<span class="slider-js-right-arrow"></span>');
     };
 
+    /*
+        Returns HTML string for arrow preloader
+    */
     var _getLoaderHtml = function(){
         return '<div class="loader-wrapper"><img src="' + options.preloaderPath + '"/></div>';
     };
@@ -408,8 +435,6 @@ var that = this,
         _onLoadNextImageComplete();
         $container.animate({opacity: 1}, 400);
         $container.parent().trigger('slider:loadComplete');
-        $container.find('.left-img img').fadeOutSlide();
-        $container.find('.right-img img').fadeOutSlide();
     };
 
     var _sizeImages = function(){
@@ -439,14 +464,18 @@ var that = this,
 
         // scale image to fit completely in browser
         if(options.sizeConstraint === "contain"){
-            if(browserRatio > imageRatio){
+            if(browserRatio > imageRatio){  // browser is wider, match height of image to browser height
                 newHeight = _getContainerHeight();
+                // apply minimum height value
                 if(newHeight < options.minHeight) newHeight = options.minHeight;
+                // calc width based on height
                 newWidth = (newHeight / naturalHeight) * naturalWidth;
                 sizing = {height:newHeight, width: newWidth};
-            }else{
+            }else{ // browser is taller, match width of image to browser width
                 newWidth = _getContainerWidth();
+                // apply min width value
                 if(newWidth < options.minWidth) newWidth = options.minWidth;
+                // calc height based on width
                 newHeight = (newWidth / naturalWidth) * naturalHeight;
                 sizing = {width:newWidth, height: newHeight};
             }
@@ -454,20 +483,24 @@ var that = this,
         // scale image to fill browser
         else{
             if(browserRatio < imageRatio){ // browser is taller, match height of image to browser height
-                // apply minimum height value
                 newHeight = _getContainerHeight();
+                // apply minimum height value
                 if(newHeight < options.minHeight) newHeight = options.minHeight;
                 // calculate width based on height
                 newWidth = (newHeight / naturalHeight) * naturalWidth;
                 sizing = {height:newHeight, width: newWidth};
-            }else{  // browser is wider, match width of image to browser height
-                // apply minimum width value
+            }else{  // browser is wider, match width of image to browser width
                 newWidth = _getContainerWidth();
+                // apply minimum width value
                 if(newWidth < options.minWidth) newWidth = options.minWidth;
                 // calculate height based on width
                 newHeight = (newWidth / naturalWidth) * naturalHeight;
                 sizing = {width:newWidth, height: newHeight};
             }
+        }
+
+        if(!sizing.width || !sizing.height){
+            return;
         }
 
         // store center image's width
@@ -496,7 +529,7 @@ var that = this,
         // if in contain/fit-all mode, set position to the left of image
         if($img.parent().hasClass('left-img')) {
             if(options.sizeConstraint == 'contain'){
-                $img.parent().css('left', (w / 2) - ($container.find('.center-img').width() /2) - $img.width() + 'px');
+                $img.parent().css('left', (w / 2) - ($container.find('.center-img').width() / 2) - $img.width() + 'px');
             }else{
                 $img.parent().css('left', -w + 'px');
             }
@@ -563,8 +596,17 @@ var that = this,
         if(rightIndex >= mediaLength) rightIndex = 0;
     };
 
+    // will return lo_res if provided, otherwise will return the required hi_res path
     var _getImageUrl = function(index){
-        return options.media[index];
+        if(options.media[index].lo_res){
+            return options.media[index].lo_res;
+        }
+        return options.media[index].hi_res;
+    };
+
+    // returns the required hi_res path
+    var _getHighResImageUrl = function(index){
+        return options.media[index].hi_res;
     };
 
     /*-------------------------------------------------
@@ -586,14 +628,6 @@ var that = this,
                     }
                 }
             });
-        },
-
-        fadeOutSlide: function(){
-            if(options.sizeConstraint !== 'cover') this.filter(':not(:animated)').animate({opacity: options.neighborOpacity}, 300);
-        },
-
-        fadeInSlide: function(){
-            if(options.sizeConstraint !== 'cover') this.filter(':not(:animated)').animate({opacity: 1}, 300);
         },
 
         addCenterProperties: function(options){

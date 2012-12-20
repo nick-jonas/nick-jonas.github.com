@@ -19,22 +19,28 @@ body{
     position:absolute;
     width:100%;
     height:100%;
-
+     -webkit-transition: opacity 0.3s ease-out;  /* Safari 3.2+, Chrome */
+     -moz-transition: opacity 0.3s ease-out;  /* Firefox 4-15 */
+       -o-transition: opacity 0.3s ease-out;  /* Opera 10.5–12.00 */
+          transition: opacity 0.3s ease-out;  /* Firefox 16+, Opera 12.50+ */
 }
 
-.left-image{
+.left-img{
     left: -100%;
     overflow:hidden;
+    opacity:0.3;
 }
 
 .center-img{
     left:50%;
     z-index:5;
+    opacity:1;
 }
 
 .right-img{
     left:100%;
     overflow:hidden;
+    opacity:0.3;
 }
 
 
