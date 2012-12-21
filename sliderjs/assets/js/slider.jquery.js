@@ -215,7 +215,8 @@ var that = this,
                 containerPos = -$center.find('img').width() + (w / 2) - ($right.find('img').width() / 2);
             }
 
-            $right.css('z-index', 5);
+            $right.css('z-index', 5).addClass('transIn');
+            $center.addClass('transOut');
 
             _onLoadNextImage();
 
@@ -231,6 +232,9 @@ var that = this,
                 $left.removeClass('left-img').addRightProperties(options).find('img').attr('src', _getImageUrl(rightIndex));
                 // NEW CENTER IMAGE
                 $right.removeClass('right-img').addCenterProperties(options);
+
+                $right.removeClass('transIn');
+                $center.removeClass('transOut');
 
                 _sizeImages();
 
@@ -283,6 +287,8 @@ var that = this,
             }
 
             $left.css('z-index', 5);
+            $left.addClass('transIn');
+            $center.addClass('transOut');
 
             $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
 
@@ -296,6 +302,9 @@ var that = this,
                 $center.removeClass('center-img').addRightProperties(options);
                 // NEW CENTER IMAGE
                 $left.removeClass('left-img').addCenterProperties(options);
+
+                $left.removeClass('transIn');
+                $center.removeClass('transOut');
 
                 _sizeImages();
 

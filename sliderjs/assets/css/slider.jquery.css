@@ -43,6 +43,13 @@ body{
     opacity:0.3;
 }
 
+.transIn{
+    opacity:1;
+}
+
+.transOut{
+    opacity:0.3;
+}
 
 /*
     ARROWS
