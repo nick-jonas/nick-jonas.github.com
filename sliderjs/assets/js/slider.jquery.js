@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.2.1
+ * Version: 0.2.2
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -229,7 +229,7 @@ var that = this,
                 // NEW LEFT IMAGE
                 $center.removeClass('center-img').addLeftProperties(options);
                 // NEW RIGHT IMAGE
-                $left.removeClass('left-img').addRightProperties(options).find('img').attr('src', _getImageUrl(rightIndex));
+                $left.removeClass('left-img').addRightProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(rightIndex));
                 // NEW CENTER IMAGE
                 $right.removeClass('right-img').addCenterProperties(options);
 
@@ -246,8 +246,17 @@ var that = this,
                 $newCenter.attr('src', _getHighResImageUrl(currentIndex));
 
                 $newRight.ensureLoad(function(){
-                    _onLoadNextImageComplete();
-                    loaded = true;
+                    var that = this;
+                    setTimeout(function(){
+                        var $this = $(that);
+                        $this.css({
+                            opacity:0.3,
+                            display:'block'
+                        });
+                        $this.stop().animate({opacity:1}, 250);
+                        _onLoadNextImageComplete();
+                        loaded = true;
+                    }, 200);
                     _sizeImage($(this));
                 });
             });
@@ -297,7 +306,7 @@ var that = this,
                 $container.css('left',  x_diff + 'px');
 
                 // NEW LEFT IMAGE
-                $right.removeClass('right-img').addLeftProperties(options).find('img').attr('src', _getImageUrl(leftIndex));
+                $right.removeClass('right-img').addLeftProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(leftIndex));
                 // NEW RIGHT IMAGE
                 $center.removeClass('center-img').addRightProperties(options);
                 // NEW CENTER IMAGE
@@ -316,7 +325,17 @@ var that = this,
                 $newCenter.attr('src', _getHighResImageUrl(currentIndex));
 
                 $newLeft.ensureLoad(function(){
-                    _onLoadPreviousImageComplete();
+                    var that = this;
+                    setTimeout(function(){
+                        var $this = $(that);
+                        $this.css({
+                            opacity:0.3,
+                            display:'block'
+                        });
+                        $this.stop().animate({opacity:1}, 250);
+                        _onLoadPreviousImageComplete();
+                        loaded = true;
+                    }, 200);
                     _sizeImage($(this));
                 });
             });
