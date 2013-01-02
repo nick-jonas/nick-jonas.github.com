@@ -28,55 +28,7 @@
 
         <script type="text/javascript">
 
-            var $sl, controls;
-
-            $(document).ready(function(){
-                createControls();
-                createSlider();
-            });
-
-            var SliderControls = function(){
-                this.startIndex = 0;
-                this.sizeConstraint = "contain";
-                this.hideArrows = false;
-                this.enableKeys = true;
-                this.animationSpeed = 600;
-                this.topPadding = 0;
-                this.bottomPadding = 0;
-                this.minWidth = 0;
-                this.minHeight = 0;
-                this.preloaderPath = 'assets/img/ajax-loader.gif';
-                this.create = function(){
-                    createSlider();
-                }
-                this.destroy = function(){
-                    destroySlider();
-                }
-            };
-
-            function createControls(){
-                controls = new SliderControls();
-                var gui = new dat.GUI();
-                gui.add(controls, 'startIndex');
-                gui.add(controls, 'sizeConstraint', ['cover', 'contain']);
-                gui.add(controls, 'hideArrows');
-                gui.add(controls, 'enableKeys');
-                gui.add(controls, 'animationSpeed').min(0);
-                gui.add(controls, 'topPadding').min(0);
-                gui.add(controls, 'bottomPadding').min(0);
-                gui.add(controls, 'minWidth').min(0);
-                gui.add(controls, 'minHeight').min(0);
-                gui.add(controls, 'preloaderPath');
-                gui.add(controls, 'create');
-                gui.add(controls, 'destroy');
-            }
-
-            function createSlider(){
-                if($sl) destroySlider();
-
-                // place slider in container
-                $sl = $('#slider').slider({
-                    'media': [
+            var $sl, controls, media = [
                         {
                             'hi_res': 'assets/img/hires/1.jpg',
                             'lo_res': 'assets/img/lores/1.jpg'
@@ -101,8 +53,63 @@
                             'hi_res': 'assets/img/hires/6.jpg',
                             'lo_res': 'assets/img/lores/6.jpg'
                         }
-                    ],
+                    ];
+
+            $(document).ready(function(){
+                createControls();
+                createSlider();
+            });
+
+            var SliderControls = function(){
+                this.startIndex = 0;
+                this.animationType = "slide";
+                this.sizeConstraint = "cover";
+                this.hideArrows = false;
+                this.enableKeys = true;
+                this.animationSpeed = 600;
+                this.topPadding = 0;
+                this.bottomPadding = 0;
+                this.minWidth = 0;
+                this.minHeight = 0;
+                this.preloaderPath = 'assets/img/ajax-loader.gif';
+                this.create = function(){
+                    createSlider();
+                };
+                this.random = function(){
+                    randomImage();
+                };
+                this.destroy = function(){
+                    destroySlider();
+                };
+            };
+
+            function createControls(){
+                controls = new SliderControls();
+                var gui = new dat.GUI();
+                gui.add(controls, 'startIndex');
+                gui.add(controls, 'animationType', ['slide', 'fade']);
+                gui.add(controls, 'sizeConstraint', ['cover', 'contain']);
+                gui.add(controls, 'hideArrows');
+                gui.add(controls, 'enableKeys');
+                gui.add(controls, 'animationSpeed').min(0);
+                gui.add(controls, 'topPadding').min(0);
+                gui.add(controls, 'bottomPadding').min(0);
+                gui.add(controls, 'minWidth').min(0);
+                gui.add(controls, 'minHeight').min(0);
+                gui.add(controls, 'preloaderPath');
+                gui.add(controls, 'create');
+                gui.add(controls, 'random');
+                gui.add(controls, 'destroy');
+            }
+
+            function createSlider(){
+                if($sl) destroySlider();
+
+                // place slider in container
+                $sl = $('#slider').slider({
+                    'media': media,
                     'startIndex': controls.startIndex,
+                    'animationType': controls.animationType,
                     'sizeConstraint': controls.sizeConstraint,
                     'hideArrows': controls.hideArrows,
                     'enableKeys': controls.enableKeys,
@@ -117,6 +124,12 @@
                 $sl.bind('slider:loadComplete', function(){
                     console.log('loaded!');
                 });
+            }
+
+            function randomImage(){
+                if($sl){
+                    $sl.goTo(Math.floor(Math.random() * media.length));
+                }
             }
 
             function destroySlider(){

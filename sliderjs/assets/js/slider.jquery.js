@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.2.2
+ * Version: 0.3.1
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -14,7 +14,8 @@ var that = this,
         defaults = {
             media: [],
             startIndex: 0,
-            sizeConstraint: "cover", // contain, cover
+            animationType: 'slide', // slide, fade
+            sizeConstraint: 'cover', // contain, cover
             leftArrow: null,
             rightArrow: null,
             hideArrows: false,
@@ -22,7 +23,7 @@ var that = this,
             enableKeys: true,
             width: '100%', // not mutable
             height: '100%', // not mutable
-            animationSpeed: 600,
+            animationSpeed: 300,
             topPadding: 0,
             bottomPadding: 0,
             preloaderPath: 'ajax-loader.gif',
@@ -84,6 +85,7 @@ var that = this,
             $left = null,
             $center = null,
             $right = null,
+            $imgs = [],
             leftImage = '<div class="left-img img-container"><img src=""/></div>',
             centerImage = '<div class="center-img img-container"><img src=""/></div>',
             rightImage = '<div class="right-img img-container"><img src=""/></div>';
@@ -105,16 +107,27 @@ var that = this,
             $(document).bind('keydown', onKeyDown);
         }
 
-        $container.append(leftImage + centerImage + rightImage);
-        $left = $('.left-img');
-        $center = $('.center-img');
-        $right = $('.right-img');
-        $left.find('img').attr('src', _getImageUrl(leftIndex));
-        $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
-        $right.find('img').attr('src', _getImageUrl(rightIndex));
+        if(options.animationType === 'fade'){
+            // only use center image for fades
+            $container.append(centerImage);
+            $center = $('.center-img');
+            $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
+            $imgs.push($center);
+        }else{
+            $container.append(leftImage + centerImage + rightImage);
+            $left = $('.left-img');
+            $center = $('.center-img');
+            $right = $('.right-img');
+            $left.find('img').attr('src', _getImageUrl(leftIndex));
+            $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
+            $right.find('img').attr('src', _getImageUrl(rightIndex));
+            $imgs.push($left);
+            $imgs.push($center);
+            $imgs.push($right);
+        }
 
         setTimeout(function(){
-            var loadCount = 3;
+            var loadCount = $imgs.length;
             $('.img-container').each(function(i){
                 var $img = $(this).find('img');
                 $img.ensureLoad(function(){
@@ -134,7 +147,7 @@ var that = this,
 
     -------------------------------------------------*/
 
-    $.fn.resize = Plugin.prototype.resize = function(){
+    var _resize = $.fn.resize = Plugin.prototype.resize = function(){
         var that = this,
             w = $(window).width(),
             $images = $('.img-container img'),
@@ -188,7 +201,82 @@ var that = this,
         return (loaded && !isLoadingLeft && !isAnimating);
     };
 
-    var shiftLeft = $.fn.shiftLeft = Plugin.prototype.shiftLeft = function(){
+    var nextImage = $.fn.nextImage = Plugin.prototype.nextImage = function(){
+        if(canShiftLeft()){
+            isAnimating = true;
+            // change index
+            currentIndex = currentIndex + 1;
+            if(currentIndex >= options.media.length) currentIndex = 0;
+            _setCurrentIndex(currentIndex);
+            _executeAnimation(true);
+        }
+    };
+
+    var prevImage = $.fn.prevImage = Plugin.prototype.prevImage = function(){
+        if(canShiftRight()){
+            isAnimating = true;
+            // change index
+            currentIndex = currentIndex - 1;
+            if(currentIndex < 0) currentIndex = options.media.length - 1;
+            _setCurrentIndex(currentIndex);
+            _executeAnimation(false);
+        }
+    };
+
+    var goTo = $.fn.goTo = Plugin.prototype.goTo = function(index){
+        if(index >= 0 && index < options.media.length){
+            if(options.animationType === 'fade'){
+                if(index < currentIndex){
+                    // shift right
+                    if(canShiftRight()){
+                        isAnimating = true;
+                        _setCurrentIndex(index);
+                        _executeAnimation(false);
+                    }
+                }else{
+                    // shift left
+                    if(canShiftLeft()){
+                        isAnimating = true;
+                        _setCurrentIndex(index);
+                        _executeAnimation(true);
+                    }
+                }
+            }else{
+                throw new Error('goTo() can only be used with animationType: `fade`');
+            }
+        }else{
+            throw new Error('Supplied index ' + index + ' is out of bounds for Array: ' + options.media);
+        }
+    };
+
+    var _executeAnimation = function(isLeft){
+        if(options.animationType === 'fade' || typeof isLeft === 'undefined'){
+            doFade();
+        }else{
+            if(isLeft){
+                shiftLeft();
+            }else{
+                shiftRight();
+            }
+        }
+    };
+
+    var doFade = function(){
+        var $center = $container.find('.center-img');
+        $center.find('img').fadeOut(options.animationSpeed, 'easeOutQuad', function(){
+            var $img = $(this);
+            $img.attr('src', _getHighResImageUrl(currentIndex));
+            $img.ensureLoad(function(){
+                _sizeImages();
+                _resize();
+                $img.fadeIn(options.animationSpeed, 'easeOutQuad', function(){
+                    isAnimating = false;
+                });
+            });
+        });
+    };
+
+    var shiftLeft = function(){
 
         var w = $(window).width(),
             $left = $container.find('.left-img'),
@@ -197,76 +285,65 @@ var that = this,
             x_diff = 0,
             containerPos = -w;
 
-        if(canShiftLeft()){
-            isAnimating = true;
-            // change index
-            currentIndex = currentIndex + 1;
-            if(currentIndex >= options.media.length) currentIndex = 0;
-            _setCurrentIndex(currentIndex);
+        _sizeImages();
+
+        if(options.sizeConstraint === 'contain'){
+            var theImage = new Image();
+            theImage.src = $right.find('img').attr('src');
+            var naturalWidth = theImage.width;
+            var naturalHeight = theImage.height;
+            x_diff = (w - $right.find('img').width()) / 2;
+            containerPos = -$center.find('img').width() + (w / 2) - ($right.find('img').width() / 2);
+        }
+
+        $right.css('z-index', 5).addClass('transIn');
+        $center.addClass('transOut');
+
+        _onLoadNextImage();
+
+        $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+
+            isAnimating = false;
+
+            $container.css('left',  x_diff + 'px');
+
+            // NEW LEFT IMAGE
+            $center.removeClass('center-img').addLeftProperties(options);
+            // NEW RIGHT IMAGE
+            $left.removeClass('left-img').addRightProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(rightIndex));
+            // NEW CENTER IMAGE
+            $right.removeClass('right-img').addCenterProperties(options);
+
+            $right.removeClass('transIn');
+            $center.removeClass('transOut');
 
             _sizeImages();
 
-            if(options.sizeConstraint === 'contain'){
-                var theImage = new Image();
-                theImage.src = $right.find('img').attr('src');
-                var naturalWidth = theImage.width;
-                var naturalHeight = theImage.height;
-                x_diff = (w - $right.find('img').width()) / 2;
-                containerPos = -$center.find('img').width() + (w / 2) - ($right.find('img').width() / 2);
-            }
+            $newRight = $container.find('.right-img img');
+            $newCenter = $container.find('.center-img img');
+            $newLeft = $container.find('.left-img img');
 
-            $right.css('z-index', 5).addClass('transIn');
-            $center.addClass('transOut');
+            // replace with hi-res image
+            $newCenter.attr('src', _getHighResImageUrl(currentIndex));
 
-            _onLoadNextImage();
-
-            $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
-
-                isAnimating = false;
-
-                $container.css('left',  x_diff + 'px');
-
-                // NEW LEFT IMAGE
-                $center.removeClass('center-img').addLeftProperties(options);
-                // NEW RIGHT IMAGE
-                $left.removeClass('left-img').addRightProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(rightIndex));
-                // NEW CENTER IMAGE
-                $right.removeClass('right-img').addCenterProperties(options);
-
-                $right.removeClass('transIn');
-                $center.removeClass('transOut');
-
-                _sizeImages();
-
-                $newRight = $container.find('.right-img img');
-                $newCenter = $container.find('.center-img img');
-                $newLeft = $container.find('.left-img img');
-
-                // replace with hi-res image
-                $newCenter.attr('src', _getHighResImageUrl(currentIndex));
-
-                $newRight.ensureLoad(function(){
-                    var that = this;
-                    setTimeout(function(){
-                        var $this = $(that);
-                        $this.css({
-                            opacity:0.3,
-                            display:'block'
-                        });
-                        $this.stop().animate({opacity:1}, 250);
-                        _onLoadNextImageComplete();
-                        loaded = true;
-                    }, 200);
-                    _sizeImage($(this));
-                });
+            $newRight.ensureLoad(function(){
+                var that = this;
+                setTimeout(function(){
+                    var $this = $(that);
+                    $this.css({
+                        opacity:1,
+                        display:'block'
+                    });
+                    // $this.stop().animate({opacity:1}, 250);
+                    _onLoadNextImageComplete();
+                    loaded = true;
+                }, 200);
+                _sizeImage($(this));
             });
-            return true;
-        }else{
-            return false;
-        }
+        });
     };
 
-    var shiftRight = $.fn.shiftRight = Plugin.prototype.shiftRight = function(){
+    var shiftRight  = function(){
 
         var w = $(window).width(),
             $left = $container.find('.left-img'),
@@ -275,74 +352,63 @@ var that = this,
             x_diff = 0,
             containerPos = w;
 
-        if(canShiftRight()){
-            isAnimating = true;
-            // change index
-            currentIndex = currentIndex - 1;
-            if(currentIndex < 0) currentIndex = options.media.length - 1;
-            _setCurrentIndex(currentIndex);
+        _sizeImages();
+
+        _onLoadPreviousImage();
+
+        if(options.sizeConstraint === 'contain'){
+            var theImage = new Image();
+            theImage.src = $left.find('img').attr('src');
+            var naturalWidth = theImage.width;
+            var naturalHeight = theImage.height;
+            x_diff = (w - $left.find('img').width()) / 2;
+            containerPos = (w /2) + ($left.find('img').width() / 2);
+        }
+
+        $left.css('z-index', 5);
+        $left.addClass('transIn');
+        $center.addClass('transOut');
+
+        $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
+
+            isAnimating = false;
+
+            $container.css('left',  x_diff + 'px');
+
+            // NEW LEFT IMAGE
+            $right.removeClass('right-img').addLeftProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(leftIndex));
+            // NEW RIGHT IMAGE
+            $center.removeClass('center-img').addRightProperties(options);
+            // NEW CENTER IMAGE
+            $left.removeClass('left-img').addCenterProperties(options);
+
+            $left.removeClass('transIn');
+            $center.removeClass('transOut');
 
             _sizeImages();
 
-            _onLoadPreviousImage();
+            $newLeft = $container.find('.left-img img');
+            $newRight = $container.find('.right-img img');
+            $newCenter = $container.find('.center-img img');
 
-            if(options.sizeConstraint === 'contain'){
-                var theImage = new Image();
-                theImage.src = $left.find('img').attr('src');
-                var naturalWidth = theImage.width;
-                var naturalHeight = theImage.height;
-                x_diff = (w - $left.find('img').width()) / 2;
-                containerPos = (w /2) + ($left.find('img').width() / 2);
-            }
+            // replace with hi-res image
+            $newCenter.attr('src', _getHighResImageUrl(currentIndex));
 
-            $left.css('z-index', 5);
-            $left.addClass('transIn');
-            $center.addClass('transOut');
-
-            $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
-
-                isAnimating = false;
-
-                $container.css('left',  x_diff + 'px');
-
-                // NEW LEFT IMAGE
-                $right.removeClass('right-img').addLeftProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(leftIndex));
-                // NEW RIGHT IMAGE
-                $center.removeClass('center-img').addRightProperties(options);
-                // NEW CENTER IMAGE
-                $left.removeClass('left-img').addCenterProperties(options);
-
-                $left.removeClass('transIn');
-                $center.removeClass('transOut');
-
-                _sizeImages();
-
-                $newLeft = $container.find('.left-img img');
-                $newRight = $container.find('.right-img img');
-                $newCenter = $container.find('.center-img img');
-
-                // replace with hi-res image
-                $newCenter.attr('src', _getHighResImageUrl(currentIndex));
-
-                $newLeft.ensureLoad(function(){
-                    var that = this;
-                    setTimeout(function(){
-                        var $this = $(that);
-                        $this.css({
-                            opacity:0.3,
-                            display:'block'
-                        });
-                        $this.stop().animate({opacity:1}, 250);
-                        _onLoadPreviousImageComplete();
-                        loaded = true;
-                    }, 200);
-                    _sizeImage($(this));
-                });
+            $newLeft.ensureLoad(function(){
+                var that = this;
+                setTimeout(function(){
+                    var $this = $(that);
+                    $this.css({
+                        opacity:1,
+                        display:'block'
+                    });
+                    //$this.stop().animate({opacity:1}, 250);
+                    _onLoadPreviousImageComplete();
+                    loaded = true;
+                }, 200);
+                _sizeImage($(this));
             });
-            return true;
-        }else{
-            return false;
-        }
+        });
     };
 
 
@@ -433,10 +499,10 @@ var that = this,
     var onKeyDown = function(e){
         switch(e.keyCode){
             case 37: // left
-                shiftRight();
+                prevImage();
                 break;
             case 39: // right
-                shiftLeft();
+                nextImage();
                 break;
         }
     };
@@ -444,14 +510,14 @@ var that = this,
     var _onLeftArrow = function(){
         $container.parent().trigger('slider:onLeft');
         if(options.manualShift === false){
-            shiftRight();
+            prevImage();
         }
     };
 
     var _onRightArrow = function(){
         $container.parent().trigger('slider:onRight');
         if(options.manualShift === false){
-            shiftLeft();
+            nextImage();
         }
     };
 
@@ -484,96 +550,98 @@ var that = this,
             newHeight,
             imageRatio;
 
-        // get natural width/height
-        theImage.src = $img.attr('src');
-        naturalWidth = theImage.width;
-        naturalHeight = theImage.height;
-        imageRatio = naturalWidth / naturalHeight;
+        if($img.length){
+            // get natural width/height
+            theImage.src = $img.attr('src');
+            naturalWidth = theImage.width;
+            naturalHeight = theImage.height;
+            imageRatio = naturalWidth / naturalHeight;
 
-        // scale image to fit completely in browser
-        if(options.sizeConstraint === "contain"){
-            if(browserRatio > imageRatio){  // browser is wider, match height of image to browser height
-                newHeight = _getContainerHeight();
-                // apply minimum height value
-                if(newHeight < options.minHeight) newHeight = options.minHeight;
-                // calc width based on height
-                newWidth = (newHeight / naturalHeight) * naturalWidth;
-                sizing = {height:newHeight, width: newWidth};
-            }else{ // browser is taller, match width of image to browser width
-                newWidth = _getContainerWidth();
-                // apply min width value
-                if(newWidth < options.minWidth) newWidth = options.minWidth;
-                // calc height based on width
-                newHeight = (newWidth / naturalWidth) * naturalHeight;
-                sizing = {width:newWidth, height: newHeight};
+            // scale image to fit completely in browser
+            if(options.sizeConstraint === "contain"){
+                if(browserRatio > imageRatio){  // browser is wider, match height of image to browser height
+                    newHeight = _getContainerHeight();
+                    // apply minimum height value
+                    if(newHeight < options.minHeight) newHeight = options.minHeight;
+                    // calc width based on height
+                    newWidth = (newHeight / naturalHeight) * naturalWidth;
+                    sizing = {height:newHeight, width: newWidth};
+                }else{ // browser is taller, match width of image to browser width
+                    newWidth = _getContainerWidth();
+                    // apply min width value
+                    if(newWidth < options.minWidth) newWidth = options.minWidth;
+                    // calc height based on width
+                    newHeight = (newWidth / naturalWidth) * naturalHeight;
+                    sizing = {width:newWidth, height: newHeight};
+                }
             }
-        }
-        // scale image to fill browser
-        else{
-            if(browserRatio < imageRatio){ // browser is taller, match height of image to browser height
-                newHeight = _getContainerHeight();
-                // apply minimum height value
-                if(newHeight < options.minHeight) newHeight = options.minHeight;
-                // calculate width based on height
-                newWidth = (newHeight / naturalHeight) * naturalWidth;
-                sizing = {height:newHeight, width: newWidth};
-            }else{  // browser is wider, match width of image to browser width
-                newWidth = _getContainerWidth();
-                // apply minimum width value
-                if(newWidth < options.minWidth) newWidth = options.minWidth;
-                // calculate height based on width
-                newHeight = (newWidth / naturalWidth) * naturalHeight;
-                sizing = {width:newWidth, height: newHeight};
+            // scale image to fill browser
+            else{
+                if(browserRatio < imageRatio){ // browser is taller, match height of image to browser height
+                    newHeight = _getContainerHeight();
+                    // apply minimum height value
+                    if(newHeight < options.minHeight) newHeight = options.minHeight;
+                    // calculate width based on height
+                    newWidth = (newHeight / naturalHeight) * naturalWidth;
+                    sizing = {height:newHeight, width: newWidth};
+                }else{  // browser is wider, match width of image to browser width
+                    newWidth = _getContainerWidth();
+                    // apply minimum width value
+                    if(newWidth < options.minWidth) newWidth = options.minWidth;
+                    // calculate height based on width
+                    newHeight = (newWidth / naturalWidth) * naturalHeight;
+                    sizing = {width:newWidth, height: newHeight};
+                }
             }
-        }
 
-        if(!sizing.width || !sizing.height){
-            return;
-        }
+            if(!sizing.width || !sizing.height){
+                return;
+            }
 
-        // store center image's width
-        if($img.parent().hasClass('center-img')){
-            centerImageWidth = newWidth;
-        }
+            // store center image's width
+            if($img.parent().hasClass('center-img')){
+                centerImageWidth = newWidth;
+            }
 
-        // add 'px'
-        sizing.width = sizing.width + 'px';
-        sizing.height = sizing.height + 'px';
+            // add 'px'
+            sizing.width = sizing.width + 'px';
+            sizing.height = sizing.height + 'px';
 
-        $img.css(sizing);
+            $img.css(sizing);
 
-        // if image 'contain' to fit all in browser, vertically center
-        if(options.sizeConstraint == 'contain'){
-            $img.parent().css('top', Math.max(options.topPadding, ((h / 2) + $img.height() / -2)) + 'px');
-        }
-
-        // place center image in middle
-        if($img.parent().hasClass('center-img')) {
-            $img.parent().css('margin-left', (w / -2) + 'px');
-        }
-
-        // place left image
-        // if in cover/fill mode, set position to negative browser width
-        // if in contain/fit-all mode, set position to the left of image
-        if($img.parent().hasClass('left-img')) {
+            // if image 'contain' to fit all in browser, vertically center
             if(options.sizeConstraint == 'contain'){
-                $img.parent().css('left', (w / 2) - ($container.find('.center-img').width() / 2) - $img.width() + 'px');
-            }else{
-                $img.parent().css('left', -w + 'px');
+                $img.parent().css('top', Math.max(options.topPadding, ((h / 2) + $img.height() / -2)) + 'px');
             }
-        }
 
-        // place right image
-        // if in cover/fill mode, set position to browser width
-        // if in contain/fit-all mode, set position to the right of image
-        if($img.parent().hasClass('right-img')){
-            if(options.sizeConstraint == 'contain'){
-                var x_diff = (w - centerImageWidth) / 2;
-                $img.parent().css('left', (w / 2) + (centerImageWidth / 2) - x_diff + 'px');
+            // place center image in middle
+            if($img.parent().hasClass('center-img')) {
+                $img.parent().css('margin-left', (w / -2) + 'px');
+            }
+
+            // place left image
+            // if in cover/fill mode, set position to negative browser width
+            // if in contain/fit-all mode, set position to the left of image
+            if($img.parent().hasClass('left-img')) {
+                if(options.sizeConstraint == 'contain'){
+                    $img.parent().css('left', (w / 2) - ($container.find('.center-img').width() / 2) - $img.width() + 'px');
+                }else{
+                    $img.parent().css('left', -w + 'px');
+                }
+            }
+
+            // place right image
+            // if in cover/fill mode, set position to browser width
+            // if in contain/fit-all mode, set position to the right of image
+            if($img.parent().hasClass('right-img')){
+                if(options.sizeConstraint == 'contain'){
+                    var x_diff = (w - centerImageWidth) / 2;
+                    $img.parent().css('left', (w / 2) + (centerImageWidth / 2) - x_diff + 'px');
 
 
-            }else{
-                $img.parent().css('left', w + 'px');
+                }else{
+                    $img.parent().css('left', w + 'px');
+                }
             }
         }
     };
@@ -691,6 +759,139 @@ var that = this,
                     $(this).css('left', w + 'px');
                 }
             });
+        }
+    });
+
+    $.extend($.easing,
+    {
+        def: 'easeOutQuad',
+        swing: function (x, t, b, c, d) {
+            //alert($.easing.default);
+            return $.easing[$.easing.def](x, t, b, c, d);
+        },
+        easeInQuad: function (x, t, b, c, d) {
+            return c*(t/=d)*t + b;
+        },
+        easeOutQuad: function (x, t, b, c, d) {
+            return -c *(t/=d)*(t-2) + b;
+        },
+        easeInOutQuad: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t + b;
+            return -c/2 * ((--t)*(t-2) - 1) + b;
+        },
+        easeInCubic: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t + b;
+        },
+        easeOutCubic: function (x, t, b, c, d) {
+            return c*((t=t/d-1)*t*t + 1) + b;
+        },
+        easeInOutCubic: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t + b;
+            return c/2*((t-=2)*t*t + 2) + b;
+        },
+        easeInQuart: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t*t + b;
+        },
+        easeOutQuart: function (x, t, b, c, d) {
+            return -c * ((t=t/d-1)*t*t*t - 1) + b;
+        },
+        easeInOutQuart: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t*t + b;
+            return -c/2 * ((t-=2)*t*t*t - 2) + b;
+        },
+        easeInQuint: function (x, t, b, c, d) {
+            return c*(t/=d)*t*t*t*t + b;
+        },
+        easeOutQuint: function (x, t, b, c, d) {
+            return c*((t=t/d-1)*t*t*t*t + 1) + b;
+        },
+        easeInOutQuint: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return c/2*t*t*t*t*t + b;
+            return c/2*((t-=2)*t*t*t*t + 2) + b;
+        },
+        easeInSine: function (x, t, b, c, d) {
+            return -c * Math.cos(t/d * (Math.PI/2)) + c + b;
+        },
+        easeOutSine: function (x, t, b, c, d) {
+            return c * Math.sin(t/d * (Math.PI/2)) + b;
+        },
+        easeInOutSine: function (x, t, b, c, d) {
+            return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
+        },
+        easeInExpo: function (x, t, b, c, d) {
+            return (t==0) ? b : c * Math.pow(2, 10 * (t/d - 1)) + b;
+        },
+        easeOutExpo: function (x, t, b, c, d) {
+            return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+        },
+        easeInOutExpo: function (x, t, b, c, d) {
+            if (t==0) return b;
+            if (t==d) return b+c;
+            if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1)) + b;
+            return c/2 * (-Math.pow(2, -10 * --t) + 2) + b;
+        },
+        easeInCirc: function (x, t, b, c, d) {
+            return -c * (Math.sqrt(1 - (t/=d)*t) - 1) + b;
+        },
+        easeOutCirc: function (x, t, b, c, d) {
+            return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
+        },
+        easeInOutCirc: function (x, t, b, c, d) {
+            if ((t/=d/2) < 1) return -c/2 * (Math.sqrt(1 - t*t) - 1) + b;
+            return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1) + b;
+        },
+        easeInElastic: function (x, t, b, c, d) {
+            var s=1.70158;var p=0;var a=c;
+            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+        },
+        easeOutElastic: function (x, t, b, c, d) {
+            var s=1.70158;var p=0;var a=c;
+            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
+        },
+        easeInOutElastic: function (x, t, b, c, d) {
+            var s=1.70158;var p=0;var a=c;
+            if (t==0) return b;  if ((t/=d/2)==2) return b+c;  if (!p) p=d*(.3*1.5);
+            if (a < Math.abs(c)) { a=c; var s=p/4; }
+            else var s = p/(2*Math.PI) * Math.asin (c/a);
+            if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+            return a*Math.pow(2,-10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )*.5 + c + b;
+        },
+        easeInBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c*(t/=d)*t*((s+1)*t - s) + b;
+        },
+        easeOutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
+        },
+        easeInOutBack: function (x, t, b, c, d, s) {
+            if (s == undefined) s = 1.70158;
+            if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(1.525))+1)*t - s)) + b;
+            return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
+        },
+        easeInBounce: function (x, t, b, c, d) {
+            return c - $.easing.easeOutBounce (x, d-t, 0, c, d) + b;
+        },
+        easeOutBounce: function (x, t, b, c, d) {
+            if ((t/=d) < (1/2.75)) {
+                return c*(7.5625*t*t) + b;
+            } else if (t < (2/2.75)) {
+                return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
+            } else if (t < (2.5/2.75)) {
+                return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
+            } else {
+                return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
+            }
+        },
+        easeInOutBounce: function (x, t, b, c, d) {
+            if (t < d/2) return $.easing.easeInBounce (x, t*2, 0, c, d) * .5 + b;
+            return $.easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
         }
     });
 
