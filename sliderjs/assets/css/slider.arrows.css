@@ -1,0 +1,49 @@
+/*
+    ARROWS
+
+    If you have your own arrows, comment these out and pass them into the
+    constructor's options
+
+*/
+.arrow-container{
+    background:white;
+    width:40px;
+    height:50px;
+    position:fixed;
+    top:50%;
+    z-index:6;
+    display:block;
+    cursor:pointer;
+    -moz-box-shadow: 0 1px 1px rgba(0,0,0,.25); /* drop shadow */
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.25); /* drop shadow */
+    box-shadow: 0 1px 1px rgba(0,0,0,.25); /* drop shadow */
+
+}
+
+.arrow-container.left {
+    left: 0px;
+}
+
+.arrow-container.right {
+    right: 0px;
+}
+
+.slider-js-left-arrow{
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 10px solid black;
+    position: absolute;
+    margin: 15px 0 0 15px;
+}
+
+.slider-js-right-arrow{
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 10px solid black;
+    position: absolute;
+    margin: 15px 0 0 15px;
+}

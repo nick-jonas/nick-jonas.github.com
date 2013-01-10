@@ -13,46 +13,64 @@
         <script type="text/javascript" src="assets/js/dat.gui.min.js"></script>
 
         <!-- necessary css for plugin -->
-        <link rel="stylesheet" href="assets/css/slider.jquery.css"/>
+        <link rel="stylesheet" href="assets/css/slider.arrows.css"/>
 
         <style>
             /* place controls above */
             .dg.ac{ z-index: 6 !important; }
             .dg .slider{ margin-left:0px; }
+
+            body{ margin:0; padding:0; overflow:hidden; }
+
+            header{
+                background:white;
+                width:122px;
+                height:47px;
+                position:absolute;
+                top:10px;
+                left:10px;
+                z-index:1;
+            }
+
+            h1{
+                font-family: Didot, 'Didot LT STD', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                font-weight:200;
+                font-style:italic;
+                font-size:20px;
+                margin:10px 0 0 5px;
+            }
+
+            #border{
+                position: absolute;
+                overflow: auto;
+                left: 0;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                border: 10px solid white;
+                pointer-events:none;
+            }
+
         </style>
 
     </head>
     <body>
 
+        <header><h1>SLIDER-JS</h1></header>
+
         <div id="slider"></div>
+
+        <div id="border"></div>
 
         <script type="text/javascript">
 
             var $sl, controls, media = [
-                        {
-                            'hi_res': 'assets/img/hires/1.jpg',
-                            'lo_res': 'assets/img/lores/1.jpg'
-                        },
-                        {
-                            'hi_res': 'assets/img/hires/2.jpg',
-                            'lo_res': 'assets/img/lores/2.jpg'
-                        },
-                        {
-                            'hi_res': 'assets/img/hires/3.jpg',
-                            'lo_res': 'assets/img/lores/3.jpg'
-                        },
-                        {
-                            'hi_res': 'assets/img/hires/4.jpg',
-                            'lo_res': 'assets/img/lores/4.jpg'
-                        },
-                        {
-                            'hi_res': 'assets/img/hires/5.jpg',
-                            'lo_res': 'assets/img/lores/5.jpg'
-                        },
-                        {
-                            'hi_res': 'assets/img/hires/6.jpg',
-                            'lo_res': 'assets/img/lores/6.jpg'
-                        }
+                        'assets/img/hires/1.jpg',
+                        'assets/img/hires/2.jpg',
+                        'assets/img/hires/3.jpg',
+                        'assets/img/hires/4.jpg',
+                        'assets/img/hires/5.jpg',
+                        'assets/img/hires/6.jpg'
                     ];
 
             $(document).ready(function(){
@@ -63,15 +81,15 @@
             var SliderControls = function(){
                 this.startIndex = 0;
                 this.animationType = "slide";
+                this.easing = 'easeOutExpo';
                 this.sizeConstraint = "cover";
                 this.hideArrows = false;
                 this.enableKeys = true;
-                this.animationSpeed = 600;
+                this.animationSpeed = 800;
                 this.topPadding = 0;
                 this.bottomPadding = 0;
                 this.minWidth = 0;
-                this.minHeight = 0;
-                this.preloaderPath = 'assets/img/ajax-loader.gif';
+                this.minHeight = 500;
                 this.create = function(){
                     createSlider();
                 };
@@ -86,9 +104,10 @@
             function createControls(){
                 controls = new SliderControls();
                 var gui = new dat.GUI();
-                gui.add(controls, 'startIndex');
+                gui.add(controls, 'startIndex').min(0);
                 gui.add(controls, 'animationType', ['slide', 'fade']);
                 gui.add(controls, 'sizeConstraint', ['cover', 'contain']);
+                gui.add(controls, 'easing', ['_default','in', 'out','in-out','snap','easeOutCubic','easeInOutCubic','easeInCirc','easeOutCirc','easeInOutCirc','easeInExpo','easeOutExpo','easeInOutExpo','easeInQuad','easeOutQuad','easeInOutQuad','easeInQuart','easeOutQuart','easeInOutQuart', 'easeInQuint',    'easeOutQuint',   'easeInOutQuint', 'easeInSine','easeOutSine','easeInOutSine','easeInBack','easeOutBack','easeInOutBack']);
                 gui.add(controls, 'hideArrows');
                 gui.add(controls, 'enableKeys');
                 gui.add(controls, 'animationSpeed').min(0);
@@ -96,10 +115,11 @@
                 gui.add(controls, 'bottomPadding').min(0);
                 gui.add(controls, 'minWidth').min(0);
                 gui.add(controls, 'minHeight').min(0);
-                gui.add(controls, 'preloaderPath');
                 gui.add(controls, 'create');
                 gui.add(controls, 'random');
                 gui.add(controls, 'destroy');
+
+                gui.close();
             }
 
             function createSlider(){
@@ -109,6 +129,7 @@
                 $sl = $('#slider').slider({
                     'media': media,
                     'startIndex': controls.startIndex,
+                    'easing': controls.easing,
                     'animationType': controls.animationType,
                     'sizeConstraint': controls.sizeConstraint,
                     'hideArrows': controls.hideArrows,
@@ -116,7 +137,6 @@
                     'animationSpeed': controls.animationSpeed,
                     'topPadding': controls.topPadding,
                     'bottomPadding': controls.bottomPadding,
-                    'preloaderPath': controls.preloaderPath,
                     'minWidth': controls.minWidth,
                     'minHeight': controls.minHeight
                 });
@@ -138,6 +158,10 @@
                     $sl.unbind('slider:loadComplete');
                     $sl = null;
                 }
+            }
+
+            function getImageSamples(){
+                return ["http://cms.taradonne.com/uploads/food-01a3.jpg", "http://cms.taradonne.com/uploads/food-01b2.jpg", "http://cms.taradonne.com/uploads/food-022.jpg", "http://cms.taradonne.com/uploads/food-032.jpg", "http://cms.taradonne.com/uploads/food-042.jpg", "http://cms.taradonne.com/uploads/food-052.jpg", "http://cms.taradonne.com/uploads/food-062.jpg", "http://cms.taradonne.com/uploads/food-071.jpg", "http://cms.taradonne.com/uploads/food-083.jpg", "http://cms.taradonne.com/uploads/food-092.jpg", "http://cms.taradonne.com/uploads/food-102.jpg", "http://cms.taradonne.com/uploads/food-112.jpg", "http://cms.taradonne.com/uploads/food-122.jpg", "http://cms.taradonne.com/uploads/food-131.jpg", "http://cms.taradonne.com/uploads/food-141.jpg", "http://cms.taradonne.com/uploads/food-152.jpg", "http://cms.taradonne.com/uploads/food-163.jpg", "http://cms.taradonne.com/uploads/food-172.jpg", "http://cms.taradonne.com/uploads/food-18.jpg", "http://cms.taradonne.com/uploads/food-191.jpg", "http://cms.taradonne.com/uploads/food-201.jpg", "http://cms.taradonne.com/uploads/food-21.jpg", "http://cms.taradonne.com/uploads/food-22.jpg", "http://cms.taradonne.com/uploads/food-231.jpg", "http://cms.taradonne.com/uploads/food-241.jpg", "http://cms.taradonne.com/uploads/food-25.jpg", "http://cms.taradonne.com/uploads/food-26.jpg", "http://cms.taradonne.com/uploads/food-27.jpg", "http://cms.taradonne.com/uploads/food-281.jpg", "http://cms.taradonne.com/uploads/food-291.jpg", "http://cms.taradonne.com/uploads/food-301.jpg", "http://cms.taradonne.com/uploads/food-31.jpg", "http://cms.taradonne.com/uploads/food-321.jpg", "http://cms.taradonne.com/uploads/food-33.jpg", "http://cms.taradonne.com/uploads/food-341.jpg", "http://cms.taradonne.com/uploads/food-351.jpg", "http://cms.taradonne.com/uploads/food-36.jpg", "http://cms.taradonne.com/uploads/food-371.jpg", "http://cms.taradonne.com/uploads/food-381.jpg", "http://cms.taradonne.com/uploads/food-39.jpg", "http://cms.taradonne.com/uploads/food-401.jpg", "http://cms.taradonne.com/uploads/food-41.jpg", "http://cms.taradonne.com/uploads/food-42.jpg", "http://cms.taradonne.com/uploads/food-431.jpg", "http://cms.taradonne.com/uploads/food-441.jpg", "http://cms.taradonne.com/uploads/food-451.jpg", "http://cms.taradonne.com/uploads/food-461.jpg", "http://cms.taradonne.com/uploads/food-47.jpg", "http://cms.taradonne.com/uploads/food-48.jpg", "http://cms.taradonne.com/uploads/food-491.jpg", "http://cms.taradonne.com/uploads/food-501.jpg", "http://cms.taradonne.com/uploads/food-511.jpg", "http://cms.taradonne.com/uploads/food-52.jpg", "http://cms.taradonne.com/uploads/food-531.jpg"];
             }
 
 

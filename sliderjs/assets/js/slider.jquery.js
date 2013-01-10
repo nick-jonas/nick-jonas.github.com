@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.3.1
+ * Version: 0.3.2
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -16,6 +16,7 @@ var that = this,
             startIndex: 0,
             animationType: 'slide', // slide, fade
             sizeConstraint: 'cover', // contain, cover
+            easing: 'easeOutExpo',
             leftArrow: null,
             rightArrow: null,
             hideArrows: false,
@@ -23,34 +24,17 @@ var that = this,
             enableKeys: true,
             width: '100%', // not mutable
             height: '100%', // not mutable
-            animationSpeed: 300,
+            animationSpeed: 800,
             topPadding: 0,
             bottomPadding: 0,
-            preloaderPath: 'ajax-loader.gif',
             minWidth: 0,
             minHeight: 0
         },
         options = {},
         $container = {},
         loaded = false,
-        isLoadingLeft = false,
-        isLoadingRight = false,
-        isPercentWidth = true,
-        isPercentHeight = true,
         isAnimating = false,
-        leftIndex,
-        rightIndex,
-        currentIndex;
-
-    /*
-
-    Events dispatched on this object:
-
-        slider:onLeft
-        slider:onRight
-        slider:loadComplete
-
-    */
+        currentIndex = 0;
 
     // The actual plugin constructor
     function Plugin( element, customOptions ) {
@@ -65,40 +49,57 @@ var that = this,
         this._defaults = defaults;
         this._name = pluginName;
 
-        isPercentWidth = options.width[options.width.length-1] === '%';
-        isPercentHeight = options.height[options.width.length-1] === '%';
-
-        options.minWidth = parseInt(options.minWidth, 10);
-        options.minHeight = parseInt(options.minHeight, 10);
-
-        _setCurrentIndex(options.startIndex);
 
         this.init();
     }
 
     Plugin.prototype.init = function () {
-
         var $this = $(this.element),
-            that = this,
-            i = 0,
-            mediaLength = options.media.length,
-            $left = null,
-            $center = null,
-            $right = null,
-            $imgs = [],
-            leftImage = '<div class="left-img img-container"><img src=""/></div>',
-            centerImage = '<div class="center-img img-container"><img src=""/></div>',
-            rightImage = '<div class="right-img img-container"><img src=""/></div>';
+            mediaCount = options.media.length,
+            elemCSS = {},
+            imageCSS = {},
+            i = 0;
 
-        // add container
-        $this.append('<div class="slider-container"></div>');
-        $container = $('.slider-container');
+        // set initial index
+        currentIndex = options.startIndex;
 
-        // add arrows
+        // setup CSS for $this
+        elemCSS['width'] = options.width;
+        elemCSS['height'] = options.height;
+        elemCSS['min-height'] = options.minHeight;
+        elemCSS['min-width'] = options.minWidth;
+        elemCSS['overflow'] = 'hidden';
+
+        // setup main container
+        $container = $this;
+        $this.addClass('slider-container');
+        $this.transition({x:0, y:0});
+        $this.css(elemCSS);
+
+        // add images
+        for(i; i < mediaCount; i++){
+            $this.append('<div id="img-' + i + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + options.sizeConstraint + '; background-image:url(\'' + _getImageUrlFromIndex(i) + '\');"></div>');
+        }
+
+        // create CSS object for each image
+        imageCSS['width'] = '100%';
+        imageCSS['height'] = '100%';
+        imageCSS['position'] = 'absolute';
+        imageCSS['background-position'] = 'center center';
+        $('.slider-img').css(imageCSS);
+
+        // preload first image
+        _getImageObjFromIndex(currentIndex).transition({opacity:0}, 0);
+        $('<img/>').attr('src', _getImageUrlFromIndex(currentIndex)).load(function() {
+            _getImageObjFromIndex(currentIndex).transition({opacity:1}, 300);
+            _onLoadComplete();
+        });
+
+        // position all images
+        _positionImages();
+
+        // setup arrows
         _createArrows();
-
-        // start with no opacity until loaded
-        $container.css('opacity', 0);
 
         // window resize event
         $(window).bind('resize', $.proxy(this.resize, this));
@@ -106,39 +107,6 @@ var that = this,
         if(options.enableKeys === true){
             $(document).bind('keydown', onKeyDown);
         }
-
-        if(options.animationType === 'fade'){
-            // only use center image for fades
-            $container.append(centerImage);
-            $center = $('.center-img');
-            $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
-            $imgs.push($center);
-        }else{
-            $container.append(leftImage + centerImage + rightImage);
-            $left = $('.left-img');
-            $center = $('.center-img');
-            $right = $('.right-img');
-            $left.find('img').attr('src', _getImageUrl(leftIndex));
-            $center.find('img').attr('src', _getHighResImageUrl(currentIndex));
-            $right.find('img').attr('src', _getImageUrl(rightIndex));
-            $imgs.push($left);
-            $imgs.push($center);
-            $imgs.push($right);
-        }
-
-        setTimeout(function(){
-            var loadCount = $imgs.length;
-            $('.img-container').each(function(i){
-                var $img = $(this).find('img');
-                $img.ensureLoad(function(){
-                    loadCount -= 1;
-                    _sizeImage($img);
-                    if(loadCount === 0){
-                        _onLoadComplete();
-                    }
-                });
-            });
-        }, 200);
     };
 
     /*-------------------------------------------------
@@ -147,274 +115,111 @@ var that = this,
 
     -------------------------------------------------*/
 
-    var _resize = $.fn.resize = Plugin.prototype.resize = function(){
-        var that = this,
-            w = $(window).width(),
-            $images = $('.img-container img'),
-            x_diff = (w - $container.find('.center-img img').width()) / 2;
-        $container.css('width', _getContainerWidth() + 'px');
-        $container.css('height', _getContainerHeight() + 'px');
-
-        if(options.sizeConstraint == 'contain' && $container.find('.center-img img').width()) {
-            $container.css('left',  x_diff + 'px');
-        }
-
-
-        $images.each(function(i){
-            _sizeImage($(this));
-        });
-    };
-
-    $.fn.getCurrentIndex = function(){
-        return currentIndex;
-    };
-
-    $.fn.getLeftIndex = function(){
-        return leftIndex;
-    };
-
-    $.fn.getRightIndex = function(){
-        return rightIndex;
-    };
-
-    $.fn.isLoading = function(){
-        return !loaded;
-    };
-
-    $.fn.isLoadingLeft = function(){
-        return isLoadingLeft;
-    };
-
-    $.fn.isLoadingRight = function(){
-        return isLoadingRight;
-    };
-
-    $.fn.isAnimating = function(){
-        return isAnimating;
-    };
-
-    var canShiftLeft = $.fn.canShiftLeft = function(){
-        return (loaded && !isLoadingRight && !isAnimating);
-    };
-
-    var canShiftRight = $.fn.canShiftRight = function(){
-        return (loaded && !isLoadingLeft && !isAnimating);
-    };
 
     var nextImage = $.fn.nextImage = Plugin.prototype.nextImage = function(){
-        if(canShiftLeft()){
+        var currDimen = _getContainerPixelDimensions(),
+            nextIndex = _getNextIndex(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $nextImage = _getImageObjFromIndex(nextIndex);
+
+        if(!isAnimating){
             isAnimating = true;
-            // change index
-            currentIndex = currentIndex + 1;
-            if(currentIndex >= options.media.length) currentIndex = 0;
-            _setCurrentIndex(currentIndex);
-            _executeAnimation(true);
+            if(options.animationType === 'fade'){
+                // fade out current image
+                $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                    // when faded out move current image out
+                    $(this).transition({x:-currDimen.width, opacity:1}, 0);
+                });
+                // move next image in
+                $nextImage.transition({x:0, opacity:0}, 0);
+                $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
+            }else{
+                // position current image
+                $currImage.transition({x:-currDimen.width, easing:options.easing}, options.animationSpeed);
+                // position next image
+                $nextImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
+            }
+
+            // set current index;
+            currentIndex = nextIndex;
         }
     };
 
     var prevImage = $.fn.prevImage = Plugin.prototype.prevImage = function(){
-        if(canShiftRight()){
+        var currDimen = _getContainerPixelDimensions(),
+            prevIndex = _getPrevIndex(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $prevImage = _getImageObjFromIndex(prevIndex);
+
+        if(!isAnimating){
             isAnimating = true;
-            // change index
-            currentIndex = currentIndex - 1;
-            if(currentIndex < 0) currentIndex = options.media.length - 1;
-            _setCurrentIndex(currentIndex);
-            _executeAnimation(false);
+            if(options.animationType === 'fade'){
+                // fade out current image
+                $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                    // when faded out move current image out
+                    $(this).transition({x:currDimen.width, opacity:1}, 0);
+                });
+                // move next image in
+                $prevImage.transition({x:0, opacity:0}, 0);
+                $prevImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
+            }else{
+                // position current image
+                $currImage.transition({x:currDimen.width, easing:options.easing}, options.animationSpeed);
+                // position previous image
+                $prevImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
+            }
+
+            // set current index;
+            currentIndex = prevIndex;
         }
     };
 
     var goTo = $.fn.goTo = Plugin.prototype.goTo = function(index){
-        if(index >= 0 && index < options.media.length){
-            if(options.animationType === 'fade'){
-                if(index < currentIndex){
-                    // shift right
-                    if(canShiftRight()){
-                        isAnimating = true;
-                        _setCurrentIndex(index);
-                        _executeAnimation(false);
-                    }
-                }else{
-                    // shift left
-                    if(canShiftLeft()){
-                        isAnimating = true;
-                        _setCurrentIndex(index);
-                        _executeAnimation(true);
-                    }
-                }
-            }else{
-                throw new Error('goTo() can only be used with animationType: `fade`');
-            }
-        }else{
-            throw new Error('Supplied index ' + index + ' is out of bounds for Array: ' + options.media);
-        }
-    };
+        var currDimen = _getContainerPixelDimensions(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $nextImage = _getImageObjFromIndex(index);
 
-    var _executeAnimation = function(isLeft){
-        if(options.animationType === 'fade' || typeof isLeft === 'undefined'){
-            doFade();
-        }else{
-            if(isLeft){
-                shiftLeft();
-            }else{
-                shiftRight();
-            }
-        }
-    };
-
-    var doFade = function(){
-        var $center = $container.find('.center-img');
-        $center.find('img').fadeOut(options.animationSpeed, 'easeOutQuad', function(){
-            var $img = $(this);
-            $img.attr('src', _getHighResImageUrl(currentIndex));
-            $img.ensureLoad(function(){
-                _sizeImages();
-                _resize();
-                $img.fadeIn(options.animationSpeed, 'easeOutQuad', function(){
-                    isAnimating = false;
-                });
+        if(!isAnimating){
+            isAnimating = true;
+            // fade out current image
+            $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                // when faded out move current image out
+                $(this).transition({x:-currDimen.width, opacity:1}, 0);
             });
-        });
-    };
+            // move next image in
+            $nextImage.transition({x:0, opacity:0}, 0);
+            $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
 
-    var shiftLeft = function(){
-
-        var w = $(window).width(),
-            $left = $container.find('.left-img'),
-            $right = $container.find('.right-img'),
-            $center = $container.find('.center-img'),
-            x_diff = 0,
-            containerPos = -w;
-
-        _sizeImages();
-
-        if(options.sizeConstraint === 'contain'){
-            var theImage = new Image();
-            theImage.src = $right.find('img').attr('src');
-            var naturalWidth = theImage.width;
-            var naturalHeight = theImage.height;
-            x_diff = (w - $right.find('img').width()) / 2;
-            containerPos = -$center.find('img').width() + (w / 2) - ($right.find('img').width() / 2);
+            currentIndex = index;
+            _positionImages();
         }
-
-        $right.css('z-index', 5).addClass('transIn');
-        $center.addClass('transOut');
-
-        _onLoadNextImage();
-
-        $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
-
-            isAnimating = false;
-
-            $container.css('left',  x_diff + 'px');
-
-            // NEW LEFT IMAGE
-            $center.removeClass('center-img').addLeftProperties(options);
-            // NEW RIGHT IMAGE
-            $left.removeClass('left-img').addRightProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(rightIndex));
-            // NEW CENTER IMAGE
-            $right.removeClass('right-img').addCenterProperties(options);
-
-            $right.removeClass('transIn');
-            $center.removeClass('transOut');
-
-            _sizeImages();
-
-            $newRight = $container.find('.right-img img');
-            $newCenter = $container.find('.center-img img');
-            $newLeft = $container.find('.left-img img');
-
-            // replace with hi-res image
-            $newCenter.attr('src', _getHighResImageUrl(currentIndex));
-
-            $newRight.ensureLoad(function(){
-                var that = this;
-                setTimeout(function(){
-                    var $this = $(that);
-                    $this.css({
-                        opacity:1,
-                        display:'block'
-                    });
-                    // $this.stop().animate({opacity:1}, 250);
-                    _onLoadNextImageComplete();
-                    loaded = true;
-                }, 200);
-                _sizeImage($(this));
-            });
-        });
     };
 
-    var shiftRight  = function(){
+    var _resize = $.fn.resize = Plugin.prototype.resize = function(){
+        _positionImages();
+    };
 
-        var w = $(window).width(),
-            $left = $container.find('.left-img'),
-            $right = $container.find('.right-img'),
-            $center = $container.find('.center-img'),
-            x_diff = 0,
-            containerPos = w;
-
-        _sizeImages();
-
-        _onLoadPreviousImage();
-
-        if(options.sizeConstraint === 'contain'){
-            var theImage = new Image();
-            theImage.src = $left.find('img').attr('src');
-            var naturalWidth = theImage.width;
-            var naturalHeight = theImage.height;
-            x_diff = (w - $left.find('img').width()) / 2;
-            containerPos = (w /2) + ($left.find('img').width() / 2);
+    var _getNextIndex = $.fn.getNextIndex = function(){
+        var nextIndex = currentIndex + 1;
+        if(nextIndex >= options.media.length){
+            nextIndex = 0;
         }
-
-        $left.css('z-index', 5);
-        $left.addClass('transIn');
-        $center.addClass('transOut');
-
-        $container.animate({'left': containerPos + 'px'}, options.animationSpeed, function(){
-
-            isAnimating = false;
-
-            $container.css('left',  x_diff + 'px');
-
-            // NEW LEFT IMAGE
-            $right.removeClass('right-img').addLeftProperties(options).find('img').css('display', 'none').attr('src', _getImageUrl(leftIndex));
-            // NEW RIGHT IMAGE
-            $center.removeClass('center-img').addRightProperties(options);
-            // NEW CENTER IMAGE
-            $left.removeClass('left-img').addCenterProperties(options);
-
-            $left.removeClass('transIn');
-            $center.removeClass('transOut');
-
-            _sizeImages();
-
-            $newLeft = $container.find('.left-img img');
-            $newRight = $container.find('.right-img img');
-            $newCenter = $container.find('.center-img img');
-
-            // replace with hi-res image
-            $newCenter.attr('src', _getHighResImageUrl(currentIndex));
-
-            $newLeft.ensureLoad(function(){
-                var that = this;
-                setTimeout(function(){
-                    var $this = $(that);
-                    $this.css({
-                        opacity:1,
-                        display:'block'
-                    });
-                    //$this.stop().animate({opacity:1}, 250);
-                    _onLoadPreviousImageComplete();
-                    loaded = true;
-                }, 200);
-                _sizeImage($(this));
-            });
-        });
+        return nextIndex;
     };
 
+    var _getPrevIndex = $.fn.getPrevIndex = function(){
+        var prevIndex = currentIndex - 1;
+        if(prevIndex < 0){
+            prevIndex = options.media.length - 1;
+        }
+        return prevIndex;
+    };
+
+    $.fn.getCurrentIndex = function(){ return currentIndex; };
 
     $.fn.destroy = function(){
-        $leftArrow.unbind('click', _onLeftArrow);
-        $rightArrow.unbind('click', _onRightArrow);
+        if($leftArrow) $leftArrow.unbind('click', _onLeftArrow);
+        if($rightArrow) $rightArrow.unbind('click', _onRightArrow);
         if(options.enableKeys === true){
             $(document).unbind('keydown', onKeyDown);
         }
@@ -423,7 +228,7 @@ var that = this,
 
         $(this).removeData();
 
-        $container.remove();
+        $container.html('');
     };
 
     /*-------------------------------------------------
@@ -432,6 +237,54 @@ var that = this,
 
     -------------------------------------------------*/
 
+    _onAnimationComplete = function(){
+        _positionImages();
+        isAnimating = false;
+    };
+
+    var _positionImages = function(){
+        var dim = _getContainerPixelDimensions(),
+            len = options.media.length,
+            mid = Math.floor(options.media.length / 2),
+            i = 0,
+            //start = Math.floor((len - currentIndex) / 2),
+            start = Math.floor(len / 2) + currentIndex,
+            indices = [],
+            xVal = 0,
+            index;
+        /*
+            sort list so middle is currentIndex and incremenents, wrapping
+            i.e. with currentIndex = 4, len = 20:
+            [15, 16, 17, 18, 19, 0, 1, 2, 3, (4), 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        */
+        var testStr = '';
+        for(i; i < len; i++){
+            //index = mid + currentIndex + i;
+            index = start + i;
+            if(index >= len) {
+                index = index % len;
+            }
+            indices[i] = index;
+            // position
+            xVal = (i - mid) * dim.width;
+            _getImageObjFromIndex(index).transition({x:xVal, y:0}, 0);
+
+            if(index === currentIndex) testStr += 'ci(' + index +'), ';
+            else testStr += index + ', ';
+        }
+        console.log(testStr);
+
+    };
+
+    // ----------------------------------------------- getters
+    var _getContainerPixelDimensions = function(){
+        return{
+            width: $container.width(),
+            height: $container.height()
+        };
+    };
+
+    //------------------------------------------------- create arrows
     var _createArrows = function(){
         var $this = $(that.element),
             mediaLength = options.media.length;
@@ -444,7 +297,7 @@ var that = this,
                     throw new Error('left arrow provided is not a jQuery instance: ' + options.leftArrow);
                 }
             }else{
-                $container.append('<div class="arrow-container left">' + _getLoaderHtml() + '</div>');
+                $container.append('<div class="arrow-container left"><span class="slider-js-left-arrow"></span></div>');
                 $leftArrow = $('.arrow-container.left');
             }
             // right arrow
@@ -455,7 +308,7 @@ var that = this,
                     throw new Error('left arrow provided is not a jQuery instance: ' + options.rightArrow);
                 }
             }else{
-                $container.append('<div class="arrow-container right">' + _getLoaderHtml() + '</div>');
+                $container.append('<div class="arrow-container right"><span class="slider-js-right-arrow"></span></div>');
                 $rightArrow = $('.arrow-container.right');
             }
         }
@@ -467,33 +320,6 @@ var that = this,
             this.$leftArrow.bind('click', $.proxy(_onLeftArrow, this));
             this.$rightArrow.bind('click', $.proxy(_onRightArrow, this));
         }
-    };
-
-    var _onLoadPreviousImage = function(){
-        isLoadingLeft = true;
-        $('.arrow-container.left').html(_getLoaderHtml());
-    };
-
-    var _onLoadNextImage = function(){
-        isLoadingRight = true;
-        $('.arrow-container.right').html(_getLoaderHtml());
-    };
-
-    var _onLoadPreviousImageComplete = function(){
-        isLoadingLeft = false;
-        $('.arrow-container.left').html('<span class="slider-js-left-arrow"></span>');
-    };
-
-    var _onLoadNextImageComplete = function(){
-        isLoadingRight = false;
-        $('.arrow-container.right').html('<span class="slider-js-right-arrow"></span>');
-    };
-
-    /*
-        Returns HTML string for arrow preloader
-    */
-    var _getLoaderHtml = function(){
-        return '<div class="loader-wrapper"><img src="' + options.preloaderPath + '"/></div>';
     };
 
     var onKeyDown = function(e){
@@ -508,14 +334,14 @@ var that = this,
     };
 
     var _onLeftArrow = function(){
-        $container.parent().trigger('slider:onLeft');
+        $container.trigger('slider:onLeft');
         if(options.manualShift === false){
             prevImage();
         }
     };
 
     var _onRightArrow = function(){
-        $container.parent().trigger('slider:onRight');
+        $container.trigger('slider:onRight');
         if(options.manualShift === false){
             nextImage();
         }
@@ -524,186 +350,34 @@ var that = this,
     var _onLoadComplete = function(){
         loaded = true;
         $(this).resize();
-        var $this = $(that.element);
-        _onLoadPreviousImageComplete();
-        _onLoadNextImageComplete();
-        $container.animate({opacity: 1}, 400);
-        $container.parent().trigger('slider:loadComplete');
+        $container.trigger('slider:loadComplete');
     };
 
-    var _sizeImages = function(){
-        _sizeImage($container.find('.center-img img'));
-        _sizeImage($container.find('.left-img img'));
-        _sizeImage($container.find('.right-img img'));
+    /* Returns jQuery object from index */
+    var _getImageObjFromIndex = function(index){
+        return $('#img-' + index);
     };
 
-    var centerImageWidth = 0;
-    var _sizeImage = function( $img ){
-        var w = _getContainerWidth(),
-            h = _getContainerHeight(),
-            browserRatio = w / h,
-            theImage = new Image(),
-            sizing = {},
-            naturalWidth,
-            naturalHeight,
-            newWidth,
-            newHeight,
-            imageRatio;
-
-        if($img.length){
-            // get natural width/height
-            theImage.src = $img.attr('src');
-            naturalWidth = theImage.width;
-            naturalHeight = theImage.height;
-            imageRatio = naturalWidth / naturalHeight;
-
-            // scale image to fit completely in browser
-            if(options.sizeConstraint === "contain"){
-                if(browserRatio > imageRatio){  // browser is wider, match height of image to browser height
-                    newHeight = _getContainerHeight();
-                    // apply minimum height value
-                    if(newHeight < options.minHeight) newHeight = options.minHeight;
-                    // calc width based on height
-                    newWidth = (newHeight / naturalHeight) * naturalWidth;
-                    sizing = {height:newHeight, width: newWidth};
-                }else{ // browser is taller, match width of image to browser width
-                    newWidth = _getContainerWidth();
-                    // apply min width value
-                    if(newWidth < options.minWidth) newWidth = options.minWidth;
-                    // calc height based on width
-                    newHeight = (newWidth / naturalWidth) * naturalHeight;
-                    sizing = {width:newWidth, height: newHeight};
-                }
-            }
-            // scale image to fill browser
-            else{
-                if(browserRatio < imageRatio){ // browser is taller, match height of image to browser height
-                    newHeight = _getContainerHeight();
-                    // apply minimum height value
-                    if(newHeight < options.minHeight) newHeight = options.minHeight;
-                    // calculate width based on height
-                    newWidth = (newHeight / naturalHeight) * naturalWidth;
-                    sizing = {height:newHeight, width: newWidth};
-                }else{  // browser is wider, match width of image to browser width
-                    newWidth = _getContainerWidth();
-                    // apply minimum width value
-                    if(newWidth < options.minWidth) newWidth = options.minWidth;
-                    // calculate height based on width
-                    newHeight = (newWidth / naturalWidth) * naturalHeight;
-                    sizing = {width:newWidth, height: newHeight};
-                }
-            }
-
-            if(!sizing.width || !sizing.height){
-                return;
-            }
-
-            // store center image's width
-            if($img.parent().hasClass('center-img')){
-                centerImageWidth = newWidth;
-            }
-
-            // add 'px'
-            sizing.width = sizing.width + 'px';
-            sizing.height = sizing.height + 'px';
-
-            $img.css(sizing);
-
-            // if image 'contain' to fit all in browser, vertically center
-            if(options.sizeConstraint == 'contain'){
-                $img.parent().css('top', Math.max(options.topPadding, ((h / 2) + $img.height() / -2)) + 'px');
-            }
-
-            // place center image in middle
-            if($img.parent().hasClass('center-img')) {
-                $img.parent().css('margin-left', (w / -2) + 'px');
-            }
-
-            // place left image
-            // if in cover/fill mode, set position to negative browser width
-            // if in contain/fit-all mode, set position to the left of image
-            if($img.parent().hasClass('left-img')) {
-                if(options.sizeConstraint == 'contain'){
-                    $img.parent().css('left', (w / 2) - ($container.find('.center-img').width() / 2) - $img.width() + 'px');
-                }else{
-                    $img.parent().css('left', -w + 'px');
-                }
-            }
-
-            // place right image
-            // if in cover/fill mode, set position to browser width
-            // if in contain/fit-all mode, set position to the right of image
-            if($img.parent().hasClass('right-img')){
-                if(options.sizeConstraint == 'contain'){
-                    var x_diff = (w - centerImageWidth) / 2;
-                    $img.parent().css('left', (w / 2) + (centerImageWidth / 2) - x_diff + 'px');
-
-
-                }else{
-                    $img.parent().css('left', w + 'px');
+    /*
+        Returns image URL by index
+        if options.media contains objects {lo_res: xxx.jpg, hi_res: xxx.jpg}, returns provided preference
+        else returns options.media[index]
+    */
+    var _getImageUrlFromIndex = function(index, pref){
+        var img = null, url = null;
+        if(index < options.media.length){
+            img = options.media[index];
+            if(typeof img === 'object'){
+                if(pref){
+                    if(img[pref]){
+                        return img[pref];
+                    }
                 }
             }
         }
+        return img;
     };
 
-    var _getContainerWidth = function(appendPx){
-        var w = $(window).width(),
-            finalWidth;
-        if(isPercentWidth){
-            var ratio = parseInt(options.width.replace('%', ''), 10) / 100;
-            finalWidth = ratio * w;
-        }else{
-            finalWidth = options.width.replace('px', '');
-        }
-        if(appendPx === true) finalWidth += 'px';
-        return finalWidth;
-    };
-
-    var _getContainerHeight = function(appendPx){
-        var h = window.innerHeight,
-            finalHeight;
-        if(isPercentHeight){
-            var ratio = parseInt(options.height.replace('%', ''), 10) / 100;
-            finalHeight = ratio * h;
-        }else{
-            finalHeight = options.height.replace('px', '');
-        }
-
-        // subtract top padding
-        if(options.topPadding){
-            finalHeight = Math.max(0, finalHeight - options.topPadding);
-        }
-
-        // subtract bottom padding
-        if(options.bottomPadding){
-            finalHeight = Math.max(0, finalHeight - options.bottomPadding);
-        }
-
-        if(appendPx === true) finalHeight += 'px';
-        return finalHeight;
-    };
-
-    var _setCurrentIndex = function( index ){
-        var mediaLength = options.media.length;
-        currentIndex = index;
-        leftIndex = currentIndex - 1;
-        rightIndex = currentIndex + 1;
-        if(leftIndex < 0) leftIndex = mediaLength - 1;
-        if(rightIndex >= mediaLength) rightIndex = 0;
-    };
-
-    // will return lo_res if provided, otherwise will return the required hi_res path
-    var _getImageUrl = function(index){
-        if(options.media[index].lo_res){
-            return options.media[index].lo_res;
-        }
-        return options.media[index].hi_res;
-    };
-
-    // returns the required hi_res path
-    var _getHighResImageUrl = function(index){
-        return options.media[index].hi_res;
-    };
 
     /*-------------------------------------------------
 
@@ -711,187 +385,8 @@ var that = this,
 
     -------------------------------------------------*/
     $.fn.extend({
-        ensureLoad: function(handler) {
-            return this.each(function() {
-                if(this.complete) {
-                    handler.call(this);
-                } else {
-                    if(this instanceof jQuery){
-                       this.load(handler);
-                    }
-                    else{
-                        $(this).load(handler);
-                    }
-                }
-            });
-        },
-
-        addCenterProperties: function(options){
-            var w = _getContainerWidth();
-            return this.each(function(){
-                $(this).addClass('center-img')
-                    .css('left', '50%')
-                    .css('z-index', 5)
-                    .css('margin-left', (w / -2) + 'px');
-            });
-        },
-
-        addLeftProperties: function(options){
-            var w = _getContainerWidth();
-            return this.each(function(){
-                $(this).addClass('left-img')
-                        .css('z-index', 4)
-                        .css('margin-left', '0px');
-                if(options.sizeConstraint !== 'contain'){
-                    $(this).css('left', -w + 'px');
-                }
-
-            });
-        },
-
-        addRightProperties: function(options){
-            var w = _getContainerWidth();
-            return this.each(function(){
-                $(this).addClass('right-img')
-                        .css('z-index', 4)
-                        .css('margin-left', '0px');
-                if(options.sizeConstraint !== 'contain'){
-                    $(this).css('left', w + 'px');
-                }
-            });
-        }
-    });
-
-    $.extend($.easing,
-    {
-        def: 'easeOutQuad',
-        swing: function (x, t, b, c, d) {
-            //alert($.easing.default);
-            return $.easing[$.easing.def](x, t, b, c, d);
-        },
-        easeInQuad: function (x, t, b, c, d) {
-            return c*(t/=d)*t + b;
-        },
-        easeOutQuad: function (x, t, b, c, d) {
-            return -c *(t/=d)*(t-2) + b;
-        },
-        easeInOutQuad: function (x, t, b, c, d) {
-            if ((t/=d/2) < 1) return c/2*t*t + b;
-            return -c/2 * ((--t)*(t-2) - 1) + b;
-        },
-        easeInCubic: function (x, t, b, c, d) {
-            return c*(t/=d)*t*t + b;
-        },
-        easeOutCubic: function (x, t, b, c, d) {
-            return c*((t=t/d-1)*t*t + 1) + b;
-        },
-        easeInOutCubic: function (x, t, b, c, d) {
-            if ((t/=d/2) < 1) return c/2*t*t*t + b;
-            return c/2*((t-=2)*t*t + 2) + b;
-        },
-        easeInQuart: function (x, t, b, c, d) {
-            return c*(t/=d)*t*t*t + b;
-        },
-        easeOutQuart: function (x, t, b, c, d) {
-            return -c * ((t=t/d-1)*t*t*t - 1) + b;
-        },
-        easeInOutQuart: function (x, t, b, c, d) {
-            if ((t/=d/2) < 1) return c/2*t*t*t*t + b;
-            return -c/2 * ((t-=2)*t*t*t - 2) + b;
-        },
-        easeInQuint: function (x, t, b, c, d) {
-            return c*(t/=d)*t*t*t*t + b;
-        },
-        easeOutQuint: function (x, t, b, c, d) {
-            return c*((t=t/d-1)*t*t*t*t + 1) + b;
-        },
-        easeInOutQuint: function (x, t, b, c, d) {
-            if ((t/=d/2) < 1) return c/2*t*t*t*t*t + b;
-            return c/2*((t-=2)*t*t*t*t + 2) + b;
-        },
-        easeInSine: function (x, t, b, c, d) {
-            return -c * Math.cos(t/d * (Math.PI/2)) + c + b;
-        },
-        easeOutSine: function (x, t, b, c, d) {
-            return c * Math.sin(t/d * (Math.PI/2)) + b;
-        },
-        easeInOutSine: function (x, t, b, c, d) {
-            return -c/2 * (Math.cos(Math.PI*t/d) - 1) + b;
-        },
-        easeInExpo: function (x, t, b, c, d) {
-            return (t==0) ? b : c * Math.pow(2, 10 * (t/d - 1)) + b;
-        },
-        easeOutExpo: function (x, t, b, c, d) {
-            return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
-        },
-        easeInOutExpo: function (x, t, b, c, d) {
-            if (t==0) return b;
-            if (t==d) return b+c;
-            if ((t/=d/2) < 1) return c/2 * Math.pow(2, 10 * (t - 1)) + b;
-            return c/2 * (-Math.pow(2, -10 * --t) + 2) + b;
-        },
-        easeInCirc: function (x, t, b, c, d) {
-            return -c * (Math.sqrt(1 - (t/=d)*t) - 1) + b;
-        },
-        easeOutCirc: function (x, t, b, c, d) {
-            return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
-        },
-        easeInOutCirc: function (x, t, b, c, d) {
-            if ((t/=d/2) < 1) return -c/2 * (Math.sqrt(1 - t*t) - 1) + b;
-            return c/2 * (Math.sqrt(1 - (t-=2)*t) + 1) + b;
-        },
-        easeInElastic: function (x, t, b, c, d) {
-            var s=1.70158;var p=0;var a=c;
-            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
-            if (a < Math.abs(c)) { a=c; var s=p/4; }
-            else var s = p/(2*Math.PI) * Math.asin (c/a);
-            return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
-        },
-        easeOutElastic: function (x, t, b, c, d) {
-            var s=1.70158;var p=0;var a=c;
-            if (t==0) return b;  if ((t/=d)==1) return b+c;  if (!p) p=d*.3;
-            if (a < Math.abs(c)) { a=c; var s=p/4; }
-            else var s = p/(2*Math.PI) * Math.asin (c/a);
-            return a*Math.pow(2,-10*t) * Math.sin( (t*d-s)*(2*Math.PI)/p ) + c + b;
-        },
-        easeInOutElastic: function (x, t, b, c, d) {
-            var s=1.70158;var p=0;var a=c;
-            if (t==0) return b;  if ((t/=d/2)==2) return b+c;  if (!p) p=d*(.3*1.5);
-            if (a < Math.abs(c)) { a=c; var s=p/4; }
-            else var s = p/(2*Math.PI) * Math.asin (c/a);
-            if (t < 1) return -.5*(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
-            return a*Math.pow(2,-10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )*.5 + c + b;
-        },
-        easeInBack: function (x, t, b, c, d, s) {
-            if (s == undefined) s = 1.70158;
-            return c*(t/=d)*t*((s+1)*t - s) + b;
-        },
-        easeOutBack: function (x, t, b, c, d, s) {
-            if (s == undefined) s = 1.70158;
-            return c*((t=t/d-1)*t*((s+1)*t + s) + 1) + b;
-        },
-        easeInOutBack: function (x, t, b, c, d, s) {
-            if (s == undefined) s = 1.70158;
-            if ((t/=d/2) < 1) return c/2*(t*t*(((s*=(1.525))+1)*t - s)) + b;
-            return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
-        },
-        easeInBounce: function (x, t, b, c, d) {
-            return c - $.easing.easeOutBounce (x, d-t, 0, c, d) + b;
-        },
-        easeOutBounce: function (x, t, b, c, d) {
-            if ((t/=d) < (1/2.75)) {
-                return c*(7.5625*t*t) + b;
-            } else if (t < (2/2.75)) {
-                return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b;
-            } else if (t < (2.5/2.75)) {
-                return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b;
-            } else {
-                return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b;
-            }
-        },
-        easeInOutBounce: function (x, t, b, c, d) {
-            if (t < d/2) return $.easing.easeInBounce (x, t*2, 0, c, d) * .5 + b;
-            return $.easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
+        resize: function(){
+            _positionImages();
         }
     });
 
@@ -905,5 +400,698 @@ var that = this,
             }
         });
     };
+
+
+
+
+
+
+
+    // JQUERY Transit Plugin
+    // http://ricostacruz.com/jquery.transit/
+    $.transit = {
+        version: "0.9.9",
+
+        // Map of $.css() keys to values for 'transitionProperty'.
+        // See https://developer.mozilla.org/en/CSS/CSS_transitions#Properties_that_can_be_animated
+        propertyMap: {
+          marginLeft    : 'margin',
+          marginRight   : 'margin',
+          marginBottom  : 'margin',
+          marginTop     : 'margin',
+          paddingLeft   : 'padding',
+          paddingRight  : 'padding',
+          paddingBottom : 'padding',
+          paddingTop    : 'padding'
+        },
+
+        // Will simply transition "instantly" if false
+        enabled: true,
+
+        // Set this to false if you don't want to use the transition end property.
+        useTransitionEnd: false
+    };
+
+  var div = document.createElement('div');
+  var support = {};
+
+  // Helper function to get the proper vendor property name.
+  // (`transition` => `WebkitTransition`)
+  function getVendorPropertyName(prop) {
+    // Handle unprefixed versions (FF16+, for example)
+    if (prop in div.style) return prop;
+
+    var prefixes = ['Moz', 'Webkit', 'O', 'ms'];
+    var prop_ = prop.charAt(0).toUpperCase() + prop.substr(1);
+
+    if (prop in div.style) { return prop; }
+
+    for (var i=0; i<prefixes.length; ++i) {
+      var vendorProp = prefixes[i] + prop_;
+      if (vendorProp in div.style) { return vendorProp; }
+    }
+  }
+
+  // Helper function to check if transform3D is supported.
+  // Should return true for Webkits and Firefox 10+.
+  function checkTransform3dSupport() {
+    div.style[support.transform] = '';
+    div.style[support.transform] = 'rotateY(90deg)';
+    return div.style[support.transform] !== '';
+  }
+
+  var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+
+  // Check for the browser's transitions support.
+  support.transition      = getVendorPropertyName('transition');
+  support.transitionDelay = getVendorPropertyName('transitionDelay');
+  support.transform       = getVendorPropertyName('transform');
+  support.transformOrigin = getVendorPropertyName('transformOrigin');
+  support.transform3d     = checkTransform3dSupport();
+
+  var eventNames = {
+    'transition':       'transitionEnd',
+    'MozTransition':    'transitionend',
+    'OTransition':      'oTransitionEnd',
+    'WebkitTransition': 'webkitTransitionEnd',
+    'msTransition':     'MSTransitionEnd'
+  };
+
+  // Detect the 'transitionend' event needed.
+  var transitionEnd = support.transitionEnd = eventNames[support.transition] || null;
+
+  // Populate jQuery's `$.support` with the vendor prefixes we know.
+  // As per [jQuery's cssHooks documentation](http://api.jquery.com/jQuery.cssHooks/),
+  // we set $.support.transition to a string of the actual property name used.
+  for (var key in support) {
+    if (support.hasOwnProperty(key) && typeof $.support[key] === 'undefined') {
+      $.support[key] = support[key];
+    }
+  }
+
+  // Avoid memory leak in IE.
+  div = null;
+
+  // ## $.cssEase
+  // List of easing aliases that you can use with `$.fn.transition`.
+  $.cssEase = {
+    '_default':       'ease',
+    'in':             'ease-in',
+    'out':            'ease-out',
+    'in-out':         'ease-in-out',
+    'snap':           'cubic-bezier(0,1,.5,1)',
+    // Penner equations
+    'easeOutCubic':   'cubic-bezier(.215,.61,.355,1)',
+    'easeInOutCubic': 'cubic-bezier(.645,.045,.355,1)',
+    'easeInCirc':     'cubic-bezier(.6,.04,.98,.335)',
+    'easeOutCirc':    'cubic-bezier(.075,.82,.165,1)',
+    'easeInOutCirc':  'cubic-bezier(.785,.135,.15,.86)',
+    'easeInExpo':     'cubic-bezier(.95,.05,.795,.035)',
+    'easeOutExpo':    'cubic-bezier(.19,1,.22,1)',
+    'easeInOutExpo':  'cubic-bezier(1,0,0,1)',
+    'easeInQuad':     'cubic-bezier(.55,.085,.68,.53)',
+    'easeOutQuad':    'cubic-bezier(.25,.46,.45,.94)',
+    'easeInOutQuad':  'cubic-bezier(.455,.03,.515,.955)',
+    'easeInQuart':    'cubic-bezier(.895,.03,.685,.22)',
+    'easeOutQuart':   'cubic-bezier(.165,.84,.44,1)',
+    'easeInOutQuart': 'cubic-bezier(.77,0,.175,1)',
+    'easeInQuint':    'cubic-bezier(.755,.05,.855,.06)',
+    'easeOutQuint':   'cubic-bezier(.23,1,.32,1)',
+    'easeInOutQuint': 'cubic-bezier(.86,0,.07,1)',
+    'easeInSine':     'cubic-bezier(.47,0,.745,.715)',
+    'easeOutSine':    'cubic-bezier(.39,.575,.565,1)',
+    'easeInOutSine':  'cubic-bezier(.445,.05,.55,.95)',
+    'easeInBack':     'cubic-bezier(.6,-.28,.735,.045)',
+    'easeOutBack':    'cubic-bezier(.175, .885,.32,1.275)',
+    'easeInOutBack':  'cubic-bezier(.68,-.55,.265,1.55)'
+  };
+
+  // ## 'transform' CSS hook
+  // Allows you to use the `transform` property in CSS.
+  //
+  //     $("#hello").css({ transform: "rotate(90deg)" });
+  //
+  //     $("#hello").css('transform');
+  //     //=> { rotate: '90deg' }
+  //
+  $.cssHooks['transit:transform'] = {
+    // The getter returns a `Transform` object.
+    get: function(elem) {
+      return $(elem).data('transform') || new Transform();
+    },
+
+    // The setter accepts a `Transform` object or a string.
+    set: function(elem, v) {
+      var value = v;
+
+      if (!(value instanceof Transform)) {
+        value = new Transform(value);
+      }
+
+      // We've seen the 3D version of Scale() not work in Chrome when the
+      // element being scaled extends outside of the viewport.  Thus, we're
+      // forcing Chrome to not use the 3d transforms as well.  Not sure if
+      // translate is affectede, but not risking it.  Detection code from
+      // http://davidwalsh.name/detecting-google-chrome-javascript
+      if (support.transform === 'WebkitTransform' && !isChrome) {
+        elem.style[support.transform] = value.toString(true);
+      } else {
+        elem.style[support.transform] = value.toString();
+      }
+
+      $(elem).data('transform', value);
+    }
+  };
+
+  // Add a CSS hook for `.css({ transform: '...' })`.
+  // In jQuery 1.8+, this will intentionally override the default `transform`
+  // CSS hook so it'll play well with Transit. (see issue #62)
+  $.cssHooks.transform = {
+    set: $.cssHooks['transit:transform'].set
+  };
+
+  // jQuery 1.8+ supports prefix-free transitions, so these polyfills will not
+  // be necessary.
+  if ($.fn.jquery < "1.8") {
+    // ## 'transformOrigin' CSS hook
+    // Allows the use for `transformOrigin` to define where scaling and rotation
+    // is pivoted.
+    //
+    //     $("#hello").css({ transformOrigin: '0 0' });
+    //
+    $.cssHooks.transformOrigin = {
+      get: function(elem) {
+        return elem.style[support.transformOrigin];
+      },
+      set: function(elem, value) {
+        elem.style[support.transformOrigin] = value;
+      }
+    };
+
+    // ## 'transition' CSS hook
+    // Allows you to use the `transition` property in CSS.
+    //
+    //     $("#hello").css({ transition: 'all 0 ease 0' });
+    //
+    $.cssHooks.transition = {
+      get: function(elem) {
+        return elem.style[support.transition];
+      },
+      set: function(elem, value) {
+        elem.style[support.transition] = value;
+      }
+    };
+  }
+
+  // ## Other CSS hooks
+  // Allows you to rotate, scale and translate.
+  registerCssHook('scale');
+  registerCssHook('translate');
+  registerCssHook('rotate');
+  registerCssHook('rotateX');
+  registerCssHook('rotateY');
+  registerCssHook('rotate3d');
+  registerCssHook('perspective');
+  registerCssHook('skewX');
+  registerCssHook('skewY');
+  registerCssHook('x', true);
+  registerCssHook('y', true);
+
+  // ## Transform class
+  // This is the main class of a transformation property that powers
+  // `$.fn.css({ transform: '...' })`.
+  //
+  // This is, in essence, a dictionary object with key/values as `-transform`
+  // properties.
+  //
+  //     var t = new Transform("rotate(90) scale(4)");
+  //
+  //     t.rotate             //=> "90deg"
+  //     t.scale              //=> "4,4"
+  //
+  // Setters are accounted for.
+  //
+  //     t.set('rotate', 4)
+  //     t.rotate             //=> "4deg"
+  //
+  // Convert it to a CSS string using the `toString()` and `toString(true)` (for WebKit)
+  // functions.
+  //
+  //     t.toString()         //=> "rotate(90deg) scale(4,4)"
+  //     t.toString(true)     //=> "rotate(90deg) scale3d(4,4,0)" (WebKit version)
+  //
+  function Transform(str) {
+    if (typeof str === 'string') { this.parse(str); }
+    return this;
+  }
+
+  Transform.prototype = {
+    // ### setFromString()
+    // Sets a property from a string.
+    //
+    //     t.setFromString('scale', '2,4');
+    //     // Same as set('scale', '2', '4');
+    //
+    setFromString: function(prop, val) {
+      var args =
+        (typeof val === 'string')  ? val.split(',') :
+        (val.constructor === Array) ? val :
+        [ val ];
+
+      args.unshift(prop);
+
+      Transform.prototype.set.apply(this, args);
+    },
+
+    // ### set()
+    // Sets a property.
+    //
+    //     t.set('scale', 2, 4);
+    //
+    set: function(prop) {
+      var args = Array.prototype.slice.apply(arguments, [1]);
+      if (this.setter[prop]) {
+        this.setter[prop].apply(this, args);
+      } else {
+        this[prop] = args.join(',');
+      }
+    },
+
+    get: function(prop) {
+      if (this.getter[prop]) {
+        return this.getter[prop].apply(this);
+      } else {
+        return this[prop] || 0;
+      }
+    },
+
+    setter: {
+      // ### rotate
+      //
+      //     .css({ rotate: 30 })
+      //     .css({ rotate: "30" })
+      //     .css({ rotate: "30deg" })
+      //     .css({ rotate: "30deg" })
+      //
+      rotate: function(theta) {
+        this.rotate = unit(theta, 'deg');
+      },
+
+      rotateX: function(theta) {
+        this.rotateX = unit(theta, 'deg');
+      },
+
+      rotateY: function(theta) {
+        this.rotateY = unit(theta, 'deg');
+      },
+
+      // ### scale
+      //
+      //     .css({ scale: 9 })      //=> "scale(9,9)"
+      //     .css({ scale: '3,2' })  //=> "scale(3,2)"
+      //
+      scale: function(x, y) {
+        if (y === undefined) { y = x; }
+        this.scale = x + "," + y;
+      },
+
+      // ### skewX + skewY
+      skewX: function(x) {
+        this.skewX = unit(x, 'deg');
+      },
+
+      skewY: function(y) {
+        this.skewY = unit(y, 'deg');
+      },
+
+      // ### perspectvie
+      perspective: function(dist) {
+        this.perspective = unit(dist, 'px');
+      },
+
+      // ### x / y
+      // Translations. Notice how this keeps the other value.
+      //
+      //     .css({ x: 4 })       //=> "translate(4px, 0)"
+      //     .css({ y: 10 })      //=> "translate(4px, 10px)"
+      //
+      x: function(x) {
+        this.set('translate', x, null);
+      },
+
+      y: function(y) {
+        this.set('translate', null, y);
+      },
+
+      // ### translate
+      // Notice how this keeps the other value.
+      //
+      //     .css({ translate: '2, 5' })    //=> "translate(2px, 5px)"
+      //
+      translate: function(x, y) {
+        if (this._translateX === undefined) { this._translateX = 0; }
+        if (this._translateY === undefined) { this._translateY = 0; }
+
+        if (x !== null && x !== undefined) { this._translateX = unit(x, 'px'); }
+        if (y !== null && y !== undefined) { this._translateY = unit(y, 'px'); }
+
+        this.translate = this._translateX + "," + this._translateY;
+      }
+    },
+
+    getter: {
+      x: function() {
+        return this._translateX || 0;
+      },
+
+      y: function() {
+        return this._translateY || 0;
+      },
+
+      scale: function() {
+        var s = (this.scale || "1,1").split(',');
+        if (s[0]) { s[0] = parseFloat(s[0]); }
+        if (s[1]) { s[1] = parseFloat(s[1]); }
+
+        // "2.5,2.5" => 2.5
+        // "2.5,1" => [2.5,1]
+        return (s[0] === s[1]) ? s[0] : s;
+      },
+
+      rotate3d: function() {
+        var s = (this.rotate3d || "0,0,0,0deg").split(',');
+        for (var i=0; i<=3; ++i) {
+          if (s[i]) { s[i] = parseFloat(s[i]); }
+        }
+        if (s[3]) { s[3] = unit(s[3], 'deg'); }
+
+        return s;
+      }
+    },
+
+    // ### parse()
+    // Parses from a string. Called on constructor.
+    parse: function(str) {
+      var self = this;
+      str.replace(/([a-zA-Z0-9]+)\((.*?)\)/g, function(x, prop, val) {
+        self.setFromString(prop, val);
+      });
+    },
+
+    // ### toString()
+    // Converts to a `transition` CSS property string. If `use3d` is given,
+    // it converts to a `-webkit-transition` CSS property string instead.
+    toString: function(use3d) {
+      var re = [];
+
+      for (var i in this) {
+        if (this.hasOwnProperty(i)) {
+          // Don't use 3D transformations if the browser can't support it.
+          if ((!support.transform3d) && (
+            (i === 'rotateX') ||
+            (i === 'rotateY') ||
+            (i === 'perspective') ||
+            (i === 'transformOrigin'))) { continue; }
+
+          if (i[0] !== '_') {
+            if (use3d && (i === 'scale')) {
+              re.push(i + "3d(" + this[i] + ",1)");
+            } else if (use3d && (i === 'translate')) {
+              re.push(i + "3d(" + this[i] + ",0)");
+            } else {
+              re.push(i + "(" + this[i] + ")");
+            }
+          }
+        }
+      }
+
+      return re.join(" ");
+    }
+  };
+
+  function callOrQueue(self, queue, fn) {
+    if (queue === true) {
+      self.queue(fn);
+    } else if (queue) {
+      self.queue(queue, fn);
+    } else {
+      fn();
+    }
+  }
+
+  // ### getProperties(dict)
+  // Returns properties (for `transition-property`) for dictionary `props`. The
+  // value of `props` is what you would expect in `$.css(...)`.
+  function getProperties(props) {
+    var re = [];
+
+    $.each(props, function(key) {
+      key = $.camelCase(key); // Convert "text-align" => "textAlign"
+      key = $.transit.propertyMap[key] || $.cssProps[key] || key;
+      key = uncamel(key); // Convert back to dasherized
+
+      if ($.inArray(key, re) === -1) { re.push(key); }
+    });
+
+    return re;
+  }
+
+  // ### getTransition()
+  // Returns the transition string to be used for the `transition` CSS property.
+  //
+  // Example:
+  //
+  //     getTransition({ opacity: 1, rotate: 30 }, 500, 'ease');
+  //     //=> 'opacity 500ms ease, -webkit-transform 500ms ease'
+  //
+  function getTransition(properties, duration, easing, delay) {
+    // Get the CSS properties needed.
+    var props = getProperties(properties);
+
+    // Account for aliases (`in` => `ease-in`).
+    if ($.cssEase[easing]) { easing = $.cssEase[easing]; }
+
+    // Build the duration/easing/delay attributes for it.
+    var attribs = '' + toMS(duration) + ' ' + easing;
+    if (parseInt(delay, 10) > 0) { attribs += ' ' + toMS(delay); }
+
+    // For more properties, add them this way:
+    // "margin 200ms ease, padding 200ms ease, ..."
+    var transitions = [];
+    $.each(props, function(i, name) {
+      transitions.push(name + ' ' + attribs);
+    });
+
+    return transitions.join(', ');
+  }
+
+  // ## $.fn.transition
+  // Works like $.fn.animate(), but uses CSS transitions.
+  //
+  //     $("...").transition({ opacity: 0.1, scale: 0.3 });
+  //
+  //     // Specific duration
+  //     $("...").transition({ opacity: 0.1, scale: 0.3 }, 500);
+  //
+  //     // With duration and easing
+  //     $("...").transition({ opacity: 0.1, scale: 0.3 }, 500, 'in');
+  //
+  //     // With callback
+  //     $("...").transition({ opacity: 0.1, scale: 0.3 }, function() { ... });
+  //
+  //     // With everything
+  //     $("...").transition({ opacity: 0.1, scale: 0.3 }, 500, 'in', function() { ... });
+  //
+  //     // Alternate syntax
+  //     $("...").transition({
+  //       opacity: 0.1,
+  //       duration: 200,
+  //       delay: 40,
+  //       easing: 'in',
+  //       complete: function() { /* ... */ }
+  //      });
+  //
+  $.fn.transition = $.fn.transit = function(properties, duration, easing, callback) {
+    var self  = this;
+    var delay = 0;
+    var queue = true;
+
+    // Account for `.transition(properties, callback)`.
+    if (typeof duration === 'function') {
+      callback = duration;
+      duration = undefined;
+    }
+
+    // Account for `.transition(properties, duration, callback)`.
+    if (typeof easing === 'function') {
+      callback = easing;
+      easing = undefined;
+    }
+
+    // Alternate syntax.
+    if (typeof properties.easing !== 'undefined') {
+      easing = properties.easing;
+      delete properties.easing;
+    }
+
+    if (typeof properties.duration !== 'undefined') {
+      duration = properties.duration;
+      delete properties.duration;
+    }
+
+    if (typeof properties.complete !== 'undefined') {
+      callback = properties.complete;
+      delete properties.complete;
+    }
+
+    if (typeof properties.queue !== 'undefined') {
+      queue = properties.queue;
+      delete properties.queue;
+    }
+
+    if (typeof properties.delay !== 'undefined') {
+      delay = properties.delay;
+      delete properties.delay;
+    }
+
+    // Set defaults. (`400` duration, `ease` easing)
+    if (typeof duration === 'undefined') { duration = $.fx.speeds._default; }
+    if (typeof easing === 'undefined')   { easing = $.cssEase._default; }
+
+    duration = toMS(duration);
+
+    // Build the `transition` property.
+    var transitionValue = getTransition(properties, duration, easing, delay);
+
+    // Compute delay until callback.
+    // If this becomes 0, don't bother setting the transition property.
+    var work = $.transit.enabled && support.transition;
+    var i = work ? (parseInt(duration, 10) + parseInt(delay, 10)) : 0;
+
+    // If there's nothing to do...
+    if (i === 0) {
+      var fn = function(next) {
+        self.css(properties);
+        if (callback) { callback.apply(self); }
+        if (next) { next(); }
+      };
+
+      callOrQueue(self, queue, fn);
+      return self;
+    }
+
+    // Save the old transitions of each element so we can restore it later.
+    var oldTransitions = {};
+
+    var run = function(nextCall) {
+      var bound = false;
+
+      // Prepare the callback.
+      var cb = function() {
+        if (bound) { self.unbind(transitionEnd, cb); }
+
+        if (i > 0) {
+          self.each(function() {
+            this.style[support.transition] = (oldTransitions[this] || null);
+          });
+        }
+
+        if (typeof callback === 'function') { callback.apply(self); }
+        if (typeof nextCall === 'function') { nextCall(); }
+      };
+
+      if ((i > 0) && (transitionEnd) && ($.transit.useTransitionEnd)) {
+        // Use the 'transitionend' event if it's available.
+        bound = true;
+        self.bind(transitionEnd, cb);
+      } else {
+        // Fallback to timers if the 'transitionend' event isn't supported.
+        window.setTimeout(cb, i);
+      }
+
+      // Apply transitions.
+      self.each(function() {
+        if (i > 0) {
+          this.style[support.transition] = transitionValue;
+        }
+        $(this).css(properties);
+      });
+    };
+
+    // Defer running. This allows the browser to paint any pending CSS it hasn't
+    // painted yet before doing the transitions.
+    var deferredRun = function(next) {
+        this.offsetWidth; // force a repaint
+        run(next);
+    };
+
+    // Use jQuery's fx queue.
+    callOrQueue(self, queue, deferredRun);
+
+    // Chainability.
+    return this;
+  };
+
+  function registerCssHook(prop, isPixels) {
+    // For certain properties, the 'px' should not be implied.
+    if (!isPixels) { $.cssNumber[prop] = true; }
+
+    $.transit.propertyMap[prop] = support.transform;
+
+    $.cssHooks[prop] = {
+      get: function(elem) {
+        var t = $(elem).css('transit:transform');
+        return t.get(prop);
+      },
+
+      set: function(elem, value) {
+        var t = $(elem).css('transit:transform');
+        t.setFromString(prop, value);
+
+        $(elem).css({ 'transit:transform': t });
+      }
+    };
+
+  }
+
+  // ### uncamel(str)
+  // Converts a camelcase string to a dasherized string.
+  // (`marginLeft` => `margin-left`)
+  function uncamel(str) {
+    return str.replace(/([A-Z])/g, function(letter) { return '-' + letter.toLowerCase(); });
+  }
+
+  // ### unit(number, unit)
+  // Ensures that number `number` has a unit. If no unit is found, assume the
+  // default is `unit`.
+  //
+  //     unit(2, 'px')          //=> "2px"
+  //     unit("30deg", 'rad')   //=> "30deg"
+  //
+  function unit(i, units) {
+    if ((typeof i === "string") && (!i.match(/^[\-0-9\.]+$/))) {
+      return i;
+    } else {
+      return "" + i + units;
+    }
+  }
+
+  // ### toMS(duration)
+  // Converts given `duration` to a millisecond string.
+  //
+  //     toMS('fast')   //=> '400ms'
+  //     toMS(10)       //=> '10ms'
+  //
+  function toMS(duration) {
+    var i = duration;
+
+    // Allow for string durations like 'fast'.
+    if ($.fx.speeds[i]) { i = $.fx.speeds[i]; }
+
+    return unit(i, 'ms');
+  }
+
+  // Export some functions for testable-ness.
+  $.transit.getTransitionValue = getTransition;
 
 })( jQuery, window, document );
