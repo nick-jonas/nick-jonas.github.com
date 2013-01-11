@@ -25,8 +25,6 @@ var that = this,
             width: '100%', // not mutable
             height: '100%', // not mutable
             animationSpeed: 800,
-            topPadding: 0,
-            bottomPadding: 0,
             minWidth: 0,
             minHeight: 0
         },
