@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.3.2
+ * Version: 0.4.1
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -61,6 +61,9 @@ var that = this,
         // set initial index
         currentIndex = options.startIndex;
 
+        if(currentIndex > options.media.length){
+            throw new Error('Supplied start index is out of bounds');
+        }
         // setup CSS for $this
         elemCSS['width'] = options.width;
         elemCSS['height'] = options.height;
@@ -74,9 +77,24 @@ var that = this,
         $this.transition({x:0, y:0});
         $this.css(elemCSS);
 
-        // add images
-        for(i; i < mediaCount; i++){
-            $this.append('<div id="img-' + i + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + options.sizeConstraint + '; background-image:url(\'' + _getImageUrlFromIndex(i) + '\');"></div>');
+        // add current index
+        $this.append(_getDivHtml(currentIndex));
+        // add rest of images going outward from current index
+        var indices = [], half = Math.floor(mediaCount / 2);
+        for(i; i < half; i++){
+            var pos = currentIndex + (i + 1),
+                neg = currentIndex - (i + 1);
+            if(pos >= mediaCount) pos = pos - mediaCount;
+            if(neg < 0) neg = mediaCount + neg;
+            // append images outward from center/currentIndex
+            if(indices.indexOf(pos) < 0){
+                indices.push(pos);
+                $this.append(_getDivHtml(pos));
+            }
+            if(indices.indexOf(neg) < 0){
+                indices.push(neg);
+                $this.append(_getDivHtml(neg));
+            }
         }
 
         // create CSS object for each image
@@ -86,12 +104,7 @@ var that = this,
         imageCSS['background-position'] = 'center center';
         $('.slider-img').css(imageCSS);
 
-        // preload first image
-        _getImageObjFromIndex(currentIndex).transition({opacity:0}, 0);
-        $('<img/>').attr('src', _getImageUrlFromIndex(currentIndex)).load(function() {
-            _getImageObjFromIndex(currentIndex).transition({opacity:1}, 300);
-            _onLoadComplete();
-        });
+        _initBackgroundImages();
 
         // position all images
         _positionImages();
@@ -112,6 +125,10 @@ var that = this,
     PUBLIC API
 
     -------------------------------------------------*/
+
+    $.fn.canChange = Plugin.prototype.canChange = function(){
+        return !isAnimating;
+    };
 
 
     var nextImage = $.fn.nextImage = Plugin.prototype.nextImage = function(){
@@ -235,7 +252,39 @@ var that = this,
 
     -------------------------------------------------*/
 
-    _onAnimationComplete = function(){
+    var _getDivHtml = function(index){
+        return '<div id="img-' + index + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + options.sizeConstraint + ';"></div>';
+    };
+
+    /*
+        Adds background-image property, from currentIndex and outwards
+    */
+    var _initBackgroundImages = function(){
+
+        // load current index
+        var $curr = _getImageObjFromIndex(currentIndex),
+            currImageUrl = _getImageUrlFromIndex(currentIndex);
+        $curr.transition({opacity:0}, 0);
+        $('<img/>').attr('src', currImageUrl).load(function() {
+            $curr.css('background-image', 'url(' + currImageUrl + ')');
+            $curr.transition({opacity:1}, 300);
+            _onLoadComplete();
+        });
+
+        // load rest
+        $('.slider-img:gt(0)').each(function(i){
+            var imgIndex = _getIndexFromImageObj($(this));
+            $('<img/>').attr('id', imgIndex).attr('src', _getImageUrlFromIndex(imgIndex)).load(function() {
+                var loadedUrl = $(this).attr('src'),
+                    thisIndex = parseInt($(this).attr('id'), 10),
+                    $thisObj = _getImageObjFromIndex(thisIndex);
+                $thisObj.css('background-image', 'url(' + loadedUrl + ')');
+                $thisObj.transition({opacity:1}, 300);
+            });
+        });
+    };
+
+    var _onAnimationComplete = function(){
         _positionImages();
         isAnimating = false;
     };
@@ -247,7 +296,6 @@ var that = this,
             i = 0,
             //start = Math.floor((len - currentIndex) / 2),
             start = Math.floor(len / 2) + currentIndex,
-            indices = [],
             xVal = 0,
             index;
         /*
@@ -257,12 +305,10 @@ var that = this,
         */
         var testStr = '';
         for(i; i < len; i++){
-            //index = mid + currentIndex + i;
-            index = start + i;
+            index = mid + currentIndex + i;
             if(index >= len) {
                 index = index % len;
             }
-            indices[i] = index;
             // position
             xVal = (i - mid) * dim.width;
             _getImageObjFromIndex(index).transition({x:xVal, y:0}, 0);
@@ -270,7 +316,8 @@ var that = this,
             if(index === currentIndex) testStr += 'ci(' + index +'), ';
             else testStr += index + ', ';
         }
-        console.log(testStr);
+
+        //console.log(testStr);
 
     };
 
@@ -354,6 +401,10 @@ var that = this,
     /* Returns jQuery object from index */
     var _getImageObjFromIndex = function(index){
         return $('#img-' + index);
+    };
+
+    var _getIndexFromImageObj = function($img){
+        return parseInt($img.attr('id').replace('img-', ''), 10);
     };
 
     /*
