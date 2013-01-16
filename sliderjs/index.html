@@ -12,6 +12,11 @@
         <!-- demo controls -->
         <script type="text/javascript" src="assets/js/dat.gui.min.js"></script>
 
+        <!-- web fonts -->
+        <link rel="stylesheet" href="assets/fonts/ss-social/webfonts/ss-social.css"/>
+        <link rel="stylesheet" href="assets/fonts/ss-pika/webfonts/ss-pika.css"/>
+        <link rel="stylesheet" href="assets/fonts/gibson/stylesheet.css"/>
+
         <!-- necessary css for plugin -->
         <link rel="stylesheet" href="assets/css/slider.arrows.css"/>
 
@@ -23,26 +28,60 @@
             .dg .close-button{
                 background:white !important;
                 color:#000;
-                font-style:italic;
                 text-shadow:none;
             }
-            body{ margin:0; padding:0; overflow:hidden; }
-
-            header{
-                background:white;
-                position:absolute;
-                padding:0 10px 10px 0;
-                top:10px;
-                left:10px;
-                z-index:1;
+            body{
+                margin:0; padding:0; overflow:hidden;
+                font-family: 'gibsonregular';
+                font-weight: normal;
+                font-style: normal;
+                font-size:20px;
             }
 
-            h1{
-                font-family: Didot, 'Didot LT STD', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-                font-weight:200;
-                font-style:italic;
-                font-size:20px;
-                margin:10px 0 0 5px;
+            #header{
+                margin: 0;
+                padding: 0;
+                list-style-type: none;
+                position: absolute;
+                top: 10px;
+                left: 10px;
+            }
+            #header li{
+                background: white;
+                position: relative;
+                top: 10px;
+                left: 10px;
+                z-index: 1;
+                height: 25px;
+                vertical-align: bottom;
+                padding:10px 15px 10px 10px;
+                border-bottom:1px black dotted;
+            }
+            #header li:last-child{
+                border-bottom:none;
+            }
+
+            .icon{
+                display:inline-block;
+                margin:4px 8px 0 0;
+            }
+
+            a{
+                text-decoration: none;
+                color:black;
+            }
+            a:hover{
+                text-decoration: underline;
+            }
+
+            .title{
+                font-size:25px;
+            }
+            .sub-item{
+                font-size:13px;
+                display: inline-block;
+                padding-top: 6px;
+                vertical-align: top;
             }
 
             #border{
@@ -61,7 +100,11 @@
     </head>
     <body>
 
-        <header><h1>SLIDER-JS</h1></header>
+        <ul id="header">
+            <li><span class="icon ss-icon">picture</span><span class="title">SLIDER.JS</span></li>
+            <li><span class="icon ss-icon ss-social">github</span><a class="sub-item" href="https://github.com/nick-jonas/SliderJS">FORK ON GITHUB</a></li>
+            <li><span class="icon ss-icon">user</span><a class="sub-item" href="https://github.com/nick-jonas">AUTHOR: NICK JONAS</a></li>
+        </ul>
 
         <div id="slider"></div>
 
