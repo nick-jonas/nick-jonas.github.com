@@ -1,6 +1,6 @@
 /*!
  * SliderJS: jQuery Plugin for full screen slideshows
- * Version: 0.4.1
+ * Version: 0.4.2
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -22,6 +22,7 @@ var that = this,
             hideArrows: false,
             manualShift: false, // set to true if you want to shiftLeft and shiftRight manually
             enableKeys: true,
+            draggable: true,
             width: '100%', // not mutable
             height: '100%', // not mutable
             animationSpeed: 800,
@@ -34,8 +35,12 @@ var that = this,
         isAnimating = false,
         currentIndex = 0;
 
-    // The actual plugin constructor
-    function Plugin( element, customOptions ) {
+    /**
+     * Constructor
+     * @param {jQuery Object} element       main jQuery object
+     * @param {Object} customOptions        slider options to override defaults
+     */
+    function SliderJS( element, customOptions ) {
         this.element = element;
 
         options = options = $.extend( {}, defaults, customOptions) ;
@@ -51,7 +56,172 @@ var that = this,
         this.init();
     }
 
-    Plugin.prototype.init = function () {
+    // PUBLIC API -----------------------------------------------------
+
+    /**
+     * Goes to the next image
+     * @return {jQuery Object} returns this element
+     */
+    var nextImage = $.fn.nextImage = SliderJS.prototype.nextImage = function(){
+        var currDimen = _getContainerPixelDimensions(),
+            nextIndex = _getNextIndex(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $nextImage = _getImageObjFromIndex(nextIndex);
+
+        console.log(currentIndex + ' > ' + nextIndex);
+
+        if(!isAnimating){
+            isAnimating = true;
+            $nextImage.css('display', 'block');
+            if(options.animationType === 'fade'){
+                // fade out current image
+                $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                    // when faded out move current image out
+                    $(this).transition({x:-currDimen.width, opacity:1}, 0);
+                });
+                // move next image in
+                $nextImage.transition({x:0, opacity:0}, 0);
+                $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
+            }else{
+                // position current image
+                $currImage.transition({x:-currDimen.width, easing:options.easing}, options.animationSpeed);
+                // position next image
+                $nextImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
+            }
+
+            // set current index;
+            currentIndex = nextIndex;
+        }
+        return $container;
+    };
+
+    /**
+     * Goes the previous image
+     * @return {jQuery Object} returns this element
+     */
+    var prevImage = $.fn.prevImage = SliderJS.prototype.prevImage = function(){
+        var currDimen = _getContainerPixelDimensions(),
+            prevIndex = _getPrevIndex(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $prevImage = _getImageObjFromIndex(prevIndex);
+
+        if(!isAnimating){
+            isAnimating = true;
+            $prevImage.css('display', 'block');
+            if(options.animationType === 'fade'){
+                // fade out current image
+                $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                    // when faded out move current image out
+                    $(this).transition({x:currDimen.width, opacity:1}, 0);
+                });
+                // move next image in
+                $prevImage.transition({x:0, opacity:0}, 0);
+                $prevImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
+            }else{
+                // position current image
+                $currImage.transition({x:currDimen.width, easing:options.easing}, options.animationSpeed);
+                // position previous image
+                $prevImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
+            }
+
+            // set current index;
+            currentIndex = prevIndex;
+        }
+        return $container;
+    };
+
+    /**
+     * Goes to specified page
+     * @param  {uint} index
+     * @return {jQuery Object}  returns this element
+     */
+    var goTo = $.fn.goTo = SliderJS.prototype.goTo = function(index){
+        var currDimen = _getContainerPixelDimensions(),
+            $currImage = _getImageObjFromIndex(currentIndex),
+            $nextImage = _getImageObjFromIndex(index);
+
+        if(!isAnimating){
+            isAnimating = true;
+            // fade out current image
+            $currImage.transition({opacity:0}, options.animationSpeed, function(){
+                // when faded out move current image out
+                $(this).transition({x:-currDimen.width, opacity:1}, 0);
+            });
+            // move next image in
+            $nextImage.css('display', 'block');
+            $nextImage.transition({x:0, opacity:0}, 0);
+            $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
+
+            currentIndex = index;
+        }
+        return $container;
+    };
+
+    /**
+     * Returns true if an image change is allowed
+     * @return {Boolean}
+     */
+    $.fn.canChange = SliderJS.prototype.canChange = function(){
+        return !isAnimating;
+    };
+
+    /**
+     * Returns next index
+     * @return {uint}
+     */
+    var _getNextIndex = $.fn.getNextIndex = function(){
+        var nextIndex = currentIndex + 1;
+        if(nextIndex >= options.media.length){
+            nextIndex = 0;
+        }
+        return nextIndex;
+    };
+
+    /**
+     * Returns previous index
+     * @return {uint}
+     */
+    var _getPrevIndex = $.fn.getPrevIndex = function(){
+        var prevIndex = currentIndex - 1;
+        if(prevIndex < 0){
+            prevIndex = options.media.length - 1;
+        }
+        return prevIndex;
+    };
+
+    /**
+     * Returns current index
+     * @return {uint}
+     */
+    $.fn.getCurrentIndex = function(){ return currentIndex; };
+
+    /**
+     * Destoys instance of SliderJS, removing it from stage
+     * @return null
+     */
+    $.fn.destroy = function(){
+        if($leftArrow) $leftArrow.unbind('click', _onLeftArrow);
+        if($rightArrow) $rightArrow.unbind('click', _onRightArrow);
+        if(options.enableKeys === true){
+            $(document).unbind('keydown', _onKeyDown);
+        }
+        $(window).unbind('resize', this.resize);
+
+
+        $(this).removeData();
+
+        $container.html('');
+    };
+
+
+
+    // PRIVATE METHODS -------------------------------------------------
+
+    /**
+     * Initializiation, called once from constructor
+     * @return null
+     */
+    var _init = SliderJS.prototype.init = function () {
         var $this = $(this.element),
             mediaCount = options.media.length,
             elemCSS = {},
@@ -77,10 +247,8 @@ var that = this,
         $this.transition({x:0, y:0});
         $this.css(elemCSS);
 
-        // add current index
-        $this.append(_getDivHtml(currentIndex));
         // add rest of images going outward from current index
-        var indices = [], half = Math.floor(mediaCount / 2);
+        var indices = [], half = Math.floor(mediaCount / 2), html = _getDivHtml(currentIndex);
         for(i; i < half; i++){
             var pos = currentIndex + (i + 1),
                 neg = currentIndex - (i + 1);
@@ -89,20 +257,45 @@ var that = this,
             // append images outward from center/currentIndex
             if(indices.indexOf(pos) < 0){
                 indices.push(pos);
-                $this.append(_getDivHtml(pos));
+                //$this.append(_getDivHtml(pos));
+                html += _getDivHtml(pos);
             }
             if(indices.indexOf(neg) < 0){
                 indices.push(neg);
-                $this.append(_getDivHtml(neg));
+                //$this.append(_getDivHtml(neg));
+                html += _getDivHtml(neg);
             }
         }
+        $this.append(html);
 
         // create CSS object for each image
         imageCSS['width'] = '100%';
         imageCSS['height'] = '100%';
         imageCSS['position'] = 'absolute';
         imageCSS['background-position'] = 'center center';
+
+        // apply CSS to all images
         $('.slider-img').css(imageCSS);
+
+        // add draggable events
+        if(options.draggable){
+            // if touch events supported, use
+            if(typeof document.ontouchstart !== 'undefined' &&
+                    typeof document.ontouchmove !== 'undefined' &&
+                    typeof document.ontouchend !== 'undefined' &&
+                    typeof document.ontouchcancel !== 'undefined'){
+                $('.slider-img').each(function(){
+                    var elem = $(this).get()[0];
+                    elem.addEventListener('touchstart', _onTouchStart);
+                    elem.addEventListener('touchmove', _onTouchMove);
+                    elem.addEventListener('touchend', _onTouchEnd);
+                    elem.addEventListener('touchcancel', _onTouchEnd);
+                });
+            }else{ // use standard mouse events
+                $(document, 'html', 'body').mouseup(_onMouseUp);
+                $('.slider-img').mousedown(_onMouseDown).mouseup(_onMouseUp).mousemove(_onMouseMove);
+            }
+        }
 
         _initBackgroundImages();
 
@@ -116,158 +309,39 @@ var that = this,
         $(window).bind('resize', $.proxy(this.resize, this));
 
         if(options.enableKeys === true){
-            $(document).bind('keydown', onKeyDown);
+            $(document).bind('keydown', _onKeyDown);
         }
     };
 
-    /*-------------------------------------------------
-
-    PUBLIC API
-
-    -------------------------------------------------*/
-
-    $.fn.canChange = Plugin.prototype.canChange = function(){
-        return !isAnimating;
-    };
-
-
-    var nextImage = $.fn.nextImage = Plugin.prototype.nextImage = function(){
-        var currDimen = _getContainerPixelDimensions(),
-            nextIndex = _getNextIndex(),
-            $currImage = _getImageObjFromIndex(currentIndex),
-            $nextImage = _getImageObjFromIndex(nextIndex);
-
-        if(!isAnimating){
-            isAnimating = true;
-            if(options.animationType === 'fade'){
-                // fade out current image
-                $currImage.transition({opacity:0}, options.animationSpeed, function(){
-                    // when faded out move current image out
-                    $(this).transition({x:-currDimen.width, opacity:1}, 0);
-                });
-                // move next image in
-                $nextImage.transition({x:0, opacity:0}, 0);
-                $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
-            }else{
-                // position current image
-                $currImage.transition({x:-currDimen.width, easing:options.easing}, options.animationSpeed);
-                // position next image
-                $nextImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
-            }
-
-            // set current index;
-            currentIndex = nextIndex;
-        }
-    };
-
-    var prevImage = $.fn.prevImage = Plugin.prototype.prevImage = function(){
-        var currDimen = _getContainerPixelDimensions(),
-            prevIndex = _getPrevIndex(),
-            $currImage = _getImageObjFromIndex(currentIndex),
-            $prevImage = _getImageObjFromIndex(prevIndex);
-
-        if(!isAnimating){
-            isAnimating = true;
-            if(options.animationType === 'fade'){
-                // fade out current image
-                $currImage.transition({opacity:0}, options.animationSpeed, function(){
-                    // when faded out move current image out
-                    $(this).transition({x:currDimen.width, opacity:1}, 0);
-                });
-                // move next image in
-                $prevImage.transition({x:0, opacity:0}, 0);
-                $prevImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
-            }else{
-                // position current image
-                $currImage.transition({x:currDimen.width, easing:options.easing}, options.animationSpeed);
-                // position previous image
-                $prevImage.transition({x:0, easing:options.easing}, options.animationSpeed, _onAnimationComplete);
-            }
-
-            // set current index;
-            currentIndex = prevIndex;
-        }
-    };
-
-    var goTo = $.fn.goTo = Plugin.prototype.goTo = function(index){
-        var currDimen = _getContainerPixelDimensions(),
-            $currImage = _getImageObjFromIndex(currentIndex),
-            $nextImage = _getImageObjFromIndex(index);
-
-        if(!isAnimating){
-            isAnimating = true;
-            // fade out current image
-            $currImage.transition({opacity:0}, options.animationSpeed, function(){
-                // when faded out move current image out
-                $(this).transition({x:-currDimen.width, opacity:1}, 0);
-            });
-            // move next image in
-            $nextImage.transition({x:0, opacity:0}, 0);
-            $nextImage.transition({opacity:1}, options.animationSpeed, _onAnimationComplete);
-
-            currentIndex = index;
-            _positionImages();
-        }
-    };
-
-    var _resize = $.fn.resize = Plugin.prototype.resize = function(){
+    /**
+     * Position images
+     * @return {jQuery Object} returns this element
+     */
+    var _resize = SliderJS.prototype.resize = function(){
         _positionImages();
     };
 
-    var _getNextIndex = $.fn.getNextIndex = function(){
-        var nextIndex = currentIndex + 1;
-        if(nextIndex >= options.media.length){
-            nextIndex = 0;
-        }
-        return nextIndex;
-    };
-
-    var _getPrevIndex = $.fn.getPrevIndex = function(){
-        var prevIndex = currentIndex - 1;
-        if(prevIndex < 0){
-            prevIndex = options.media.length - 1;
-        }
-        return prevIndex;
-    };
-
-    $.fn.getCurrentIndex = function(){ return currentIndex; };
-
-    $.fn.destroy = function(){
-        if($leftArrow) $leftArrow.unbind('click', _onLeftArrow);
-        if($rightArrow) $rightArrow.unbind('click', _onRightArrow);
-        if(options.enableKeys === true){
-            $(document).unbind('keydown', onKeyDown);
-        }
-        $(window).unbind('resize', this.resize);
-
-
-        $(this).removeData();
-
-        $container.html('');
-    };
-
-    /*-------------------------------------------------
-
-    PRIVATE METHODS
-
-    -------------------------------------------------*/
-
+    /**
+     * Returns an image div
+     * @param  {uint} index image's index
+     * @return {String}
+     */
     var _getDivHtml = function(index){
         return '<div id="img-' + index + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + options.sizeConstraint + ';"></div>';
     };
 
-    /*
-        Adds background-image property, from currentIndex and outwards
-    */
+    /**
+     * On initial load, adds background-image property, from currentIndex and outwards
+     * @return null
+     */
     var _initBackgroundImages = function(){
-
         // load current index
         var $curr = _getImageObjFromIndex(currentIndex),
             currImageUrl = _getImageUrlFromIndex(currentIndex);
         $curr.transition({opacity:0}, 0);
         $('<img/>').attr('src', currImageUrl).load(function() {
             $curr.css('background-image', 'url(' + currImageUrl + ')');
-            $curr.transition({opacity:1}, 300);
+            $curr.transition({opacity:1}, 300, _onAnimationComplete);
             _onLoadComplete();
         });
 
@@ -279,49 +353,66 @@ var that = this,
                     thisIndex = parseInt($(this).attr('id'), 10),
                     $thisObj = _getImageObjFromIndex(thisIndex);
                 $thisObj.css('background-image', 'url(' + loadedUrl + ')');
-                $thisObj.transition({opacity:1}, 300);
+                $thisObj.transition({opacity:1});
             });
         });
     };
 
+    /**
+     * Turns off isAnimating flag, positions elements, handles off-screen image properites
+     * @return null
+     */
     var _onAnimationComplete = function(){
         _positionImages();
         isAnimating = false;
+        _setOffscreenDisplayProps();
     };
 
-    var _positionImages = function(){
-        var dim = _getContainerPixelDimensions(),
-            len = options.media.length,
-            mid = Math.floor(options.media.length / 2),
-            i = 0,
-            //start = Math.floor((len - currentIndex) / 2),
-            start = Math.floor(len / 2) + currentIndex,
-            xVal = 0,
-            index;
-        /*
-            sort list so middle is currentIndex and incremenents, wrapping
-            i.e. with currentIndex = 4, len = 20:
-            [15, 16, 17, 18, 19, 0, 1, 2, 3, (4), 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-        */
-        var testStr = '';
-        for(i; i < len; i++){
-            index = mid + currentIndex + i;
-            if(index >= len) {
-                index = index % len;
+    /**
+     * Sets display:none to all elements off screen
+     */
+    var _setOffscreenDisplayProps = function(){
+        $('.slider-img').each(function(i){
+            var $this = $(this),
+                index = _getIndexFromImageObj($this);
+            if(index !== currentIndex){
+                $this.css('display', 'none');
+            }else{
+                $this.css('display', 'block');
             }
-            // position
-            xVal = (i - mid) * dim.width;
-            _getImageObjFromIndex(index).transition({x:xVal, y:0}, 0);
-
-            if(index === currentIndex) testStr += 'ci(' + index +'), ';
-            else testStr += index + ', ';
-        }
-
-        //console.log(testStr);
-
+        });
     };
 
-    // ----------------------------------------------- getters
+    /**
+     * Positions all images
+     */
+    var _positionImages = function(){
+        var i = 0,
+            dim = _getContainerPixelDimensions(),
+            mediaCount = options.media.length,
+            half = Math.floor(mediaCount / 2);
+
+        // set current index
+        _getImageObjFromIndex(currentIndex).transition({x:0, y:0}, 0);
+
+        // set position of everything after current index
+        for(i; i < half; i++){
+            var pos = currentIndex + (i + 1),
+                neg = currentIndex - (i + 1);
+            if(pos >= mediaCount) pos = pos - mediaCount;
+            if(neg < 0) neg = mediaCount + neg;
+            // append images outward from center/currentIndex
+            var $pos = _getImageObjFromIndex(pos);
+            var $neg = _getImageObjFromIndex(neg);
+            $pos.transition({x:(i + 1) * dim.width, y:0}, 0);
+            $neg.transition({x:(i + 1) * -dim.width, y:0}, 0);
+        }
+    };
+
+    /**
+     * Returns width & height of container
+     * @return {Object}
+     */
     var _getContainerPixelDimensions = function(){
         return{
             width: $container.width(),
@@ -329,7 +420,10 @@ var that = this,
         };
     };
 
-    //------------------------------------------------- create arrows
+    /**
+     * Creates the arrows
+     * @return null
+     */
     var _createArrows = function(){
         var $this = $(that.element),
             mediaLength = options.media.length;
@@ -338,6 +432,7 @@ var that = this,
             if(options.leftArrow) {
                 if(options.leftArrow instanceof jQuery) {
                     $leftArrow = options.leftArrow;
+                    $leftArrow.addClass('arrow-container');
                 }else{
                     throw new Error('left arrow provided is not a jQuery instance: ' + options.leftArrow);
                 }
@@ -349,6 +444,7 @@ var that = this,
             if(options.rightArrow) {
                 if(options.rightArrow instanceof jQuery) {
                     $rightArrow = options.rightArrow;
+                    $rightArrow.addClass('arrow-container');
                 }else{
                     throw new Error('left arrow provided is not a jQuery instance: ' + options.rightArrow);
                 }
@@ -362,12 +458,17 @@ var that = this,
             this.$leftArrow.hide();
             this.$rightArrow.hide();
         }else{
-            this.$leftArrow.bind('click', $.proxy(_onLeftArrow, this));
-            this.$rightArrow.bind('click', $.proxy(_onRightArrow, this));
+            this.$leftArrow.bind('mouseup', $.proxy(_onLeftArrow, this));
+            this.$rightArrow.bind('mouseup', $.proxy(_onRightArrow, this));
         }
     };
 
-    var onKeyDown = function(e){
+    /**
+     * Handler for keyboard, calling previous or next image
+     * @param  {Object} e Event return object
+     * @return null
+     */
+    var _onKeyDown = function(e){
         switch(e.keyCode){
             case 37: // left
                 prevImage();
@@ -378,6 +479,10 @@ var that = this,
         }
     };
 
+    /**
+     * On Left arrow click handler
+     * @return null
+     */
     var _onLeftArrow = function(){
         $container.trigger('slider:onLeft');
         if(options.manualShift === false){
@@ -385,6 +490,10 @@ var that = this,
         }
     };
 
+    /**
+     * on Right arrow click handler
+     * @return null
+     */
     var _onRightArrow = function(){
         $container.trigger('slider:onRight');
         if(options.manualShift === false){
@@ -392,26 +501,43 @@ var that = this,
         }
     };
 
+    /**
+     * Called on entire sliderjs load complete
+     * @return null
+     */
     var _onLoadComplete = function(){
         loaded = true;
-        $(this).resize();
+        _resize();
         $container.trigger('slider:loadComplete');
     };
 
-    /* Returns jQuery object from index */
+    /**
+     * Returns jQuery object from index
+     * @param  {uint} index image index
+     * @return {jQuery Object}
+     */
     var _getImageObjFromIndex = function(index){
         return $('#img-' + index);
     };
 
+    /**
+     * Returns index from jQuery Object
+     * @param  {jQuery Object} $img
+     * @return {uint}
+     */
     var _getIndexFromImageObj = function($img){
         return parseInt($img.attr('id').replace('img-', ''), 10);
     };
 
-    /*
-        Returns image URL by index
+    /**
+     * Returns image URL by index
         if options.media contains objects {lo_res: xxx.jpg, hi_res: xxx.jpg}, returns provided preference
         else returns options.media[index]
-    */
+
+     * @param  {uint} index
+     * @param  {String} pref  'lo_res' || 'hi_res', if provided
+     * @return {String}
+     */
     var _getImageUrlFromIndex = function(index, pref){
         var img = null, url = null;
         if(index < options.media.length){
@@ -427,32 +553,203 @@ var that = this,
         return img;
     };
 
-
-    /*-------------------------------------------------
-
-    EXTEND JQUERY
-
-    -------------------------------------------------*/
-    $.fn.extend({
-        resize: function(){
-            _positionImages();
-        }
-    });
-
-    // A really lightweight plugin wrapper around the constructor,
-    // preventing against multiple instantiations
+    /**
+     * A really lightweight plugin wrapper around the constructor,
+        preventing against multiple instantiations
+     * @param  {Object} options
+     * @return {jQuery Object}
+     */
     $.fn[pluginName] = function ( options ) {
         return this.each(function () {
             if (!$.data(this, 'plugin_' + pluginName)) {
                 $.data(this, 'plugin_' + pluginName,
-                new Plugin( this, options ));
+                new SliderJS( this, options ));
             }
         });
     };
 
+    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
+    // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 
+    // requestAnimationFrame polyfill by Erik Möller
+    // fixes from Paul Irish and Tino Zijdel
+    (function() {
+        var lastTime = 0;
+        var vendors = ['ms', 'moz', 'webkit', 'o'];
+        for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x){
+            window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+            window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+        }
 
+        if (!window.requestAnimationFrame)
+            window.requestAnimationFrame = function(callback, element) {
+                var currTime = new Date().getTime();
+                var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+                  timeToCall);
+                lastTime = currTime + timeToCall;
+                return id;
+            };
 
+        if (!window.cancelAnimationFrame)
+            window.cancelAnimationFrame = function(id) {
+                clearTimeout(id);
+            };
+    }());
+
+    // dragging variables
+    var _animFrame = null,
+        _mouseX = null,
+        _mouseDiff = null,
+        $draggedImg = null; // currently dragged img
+    /**
+     * Handler for mousedown events on images
+     * @param  {Event} e mousedown event data
+     * @return null
+     */
+    var _onMouseDown = function(e){
+        var index = _getIndexFromImageObj($(e.currentTarget));
+        if(!isAnimating){
+            // turn off text selection
+            document.onselectstart = function(){ return false; };
+            $draggedImg = $(e.currentTarget);
+            _mouseX = e.clientX;
+            _mouseDiff = _mouseX -_getTranslateX($draggedImg);
+            // start loop
+            (function animloop(){
+                _animFrame = requestAnimationFrame(animloop);
+                _loop();
+            })();
+        }
+    };
+
+    /**
+     * Handler for touchstart events on images
+     * @param  {Event} e touchstart event data
+     * @return null
+     */
+    var _onTouchStart = function(e){
+        var touch = e.touches[0];
+        e.preventDefault();
+        if(!isAnimating){
+            $draggedImg = $(e.target);
+            _mouseX = touch.pageX;
+            _mouseDiff = _mouseX - _getTranslateX($draggedImg);
+            // start loop
+            (function animloop(){
+                _animFrame = requestAnimationFrame(animloop);
+                _loop();
+            })();
+        }
+    };
+
+    /**
+     * Handler for touchmove events on images
+     * @param  {Event} e touchmove event data
+     * @return null
+     */
+    var _onTouchMove = function(e){
+        e.preventDefault();
+        var touch = e.touches[0];
+        _mouseX = touch.pageX;
+    };
+
+    /**
+     * Handler for touchend & touchcancel events on images
+     * @param  {Event} e touchend event data
+     * @return null
+     */
+    var _onTouchEnd = function(e){
+        e.preventDefault();
+        if(!$(e.target).hasClass('arrow-container')){
+            _onFinishDrag();
+        }
+    };
+
+    /**
+     * Handler for mousemove events on images
+     * @param  {Event} e mousemove event data
+     * @return null
+     */
+    var _onMouseMove = function(e){
+        _mouseX = e.clientX;
+    };
+
+    /**
+     * Handler for mouseup events on images
+     * @param  {Event} e mouseup event data
+     * @return null
+     */
+    var _onMouseUp = function(e){
+        document.onselectstart = function(){ return true; };
+        // turn on text selection
+        if(!$(e.target).hasClass('arrow-container')){
+            _onFinishDrag();
+        }
+    };
+
+    /**
+     * Called after touchend or mouseup, animates dragged image based on position
+     * @return null
+     */
+    var _onFinishDrag = function(){
+        // cancel loop
+        cancelAnimationFrame(_animFrame);
+        // check for next/previous image
+        var currX = _getTranslateX($draggedImg),
+            w = _getContainerPixelDimensions().width;
+
+        if(currX && !isAnimating){
+            if(currX < (w / -2)){
+                // move to next
+                console.log('finish drag, nextImage');
+                nextImage();
+            }else if(currX > (w / 2)){
+                // move to prev
+                prevImage();
+            }else{
+                // snap back
+                isAnimating = true;
+                $draggedImg.transition({x:0, easing:'easeOutExpo'}, 300, function(){
+                    _onAnimationComplete();
+                    $draggedImg = null;
+                });
+            }
+        }
+    };
+
+    /**
+     * Animation loop, sets image position based on cursor/mouse
+     * @return {[type]}
+     */
+    var _loop = function(){
+        if($draggedImg){
+            var currentX = _getTranslateX($draggedImg);
+            //_setTranslateX($draggedImg, _mouseX);
+            _setTranslateX($draggedImg, _mouseX - _mouseDiff);
+        }
+    };
+
+    /**
+     * Getter for image's translateX property
+     * @param  {jQuery Object} $obj
+     * @return {int}
+     */
+    var _getTranslateX = function($obj){
+        if($obj){
+            return parseInt($obj.css('translate').split(',')[0], 10);
+        }
+        return null;
+    };
+
+    /**
+     * Sets translate X property of jQuery object
+     * @param {jQuery Object} $obj
+     * @param {Number} x
+     */
+    var _setTranslateX = function($obj, x){
+        $draggedImg.transition({x:x, y:0}, 0);
+    };
 
 
 

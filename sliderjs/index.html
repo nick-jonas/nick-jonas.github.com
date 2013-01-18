@@ -136,6 +136,7 @@
                 this.animationSpeed = 800;
                 this.minWidth = 0;
                 this.minHeight = 500;
+                this.draggable = true;
                 this.create = function(){
                     createSlider();
                 };
@@ -154,6 +155,7 @@
                 gui.add(controls, 'animationType', ['slide', 'fade']);
                 gui.add(controls, 'sizeConstraint', ['cover', 'contain']);
                 gui.add(controls, 'easing', ['_default','in', 'out','in-out','snap','easeOutCubic','easeInOutCubic','easeInCirc','easeOutCirc','easeInOutCirc','easeInExpo','easeOutExpo','easeInOutExpo','easeInQuad','easeOutQuad','easeInOutQuad','easeInQuart','easeOutQuart','easeInOutQuart', 'easeInQuint',    'easeOutQuint',   'easeInOutQuint', 'easeInSine','easeOutSine','easeInOutSine','easeInBack','easeOutBack','easeInOutBack']);
+                gui.add(controls, 'draggable');
                 gui.add(controls, 'hideArrows');
                 gui.add(controls, 'enableKeys');
                 gui.add(controls, 'animationSpeed').min(0);
@@ -171,7 +173,7 @@
 
                 // place slider in container
                 $sl = $('#slider').slider({
-                    'media': media,
+                    'media': getImageSamples(),//media,
                     'startIndex': controls.startIndex,
                     'easing': controls.easing,
                     'animationType': controls.animationType,
@@ -180,7 +182,8 @@
                     'enableKeys': controls.enableKeys,
                     'animationSpeed': controls.animationSpeed,
                     'minWidth': controls.minWidth,
-                    'minHeight': controls.minHeight
+                    'minHeight': controls.minHeight,
+                    'draggable': controls.draggable
                 });
 
                 $sl.bind('slider:loadComplete', function(){
@@ -203,6 +206,8 @@
             }
 
             function getImageSamples(){
+                return ["http://cms.taradonne.com/uploads/food-541.jpg", "http://cms.taradonne.com/uploads/food-291.jpg", "http://cms.taradonne.com/uploads/stills-26.jpg", "http://cms.taradonne.com/uploads/travel-046.jpg", "http://cms.taradonne.com/uploads/life-34.jpg", "http://cms.taradonne.com/uploads/kids-221.jpg"];
+
                 return ["http://cms.taradonne.com/uploads/food-01a3.jpg", "http://cms.taradonne.com/uploads/food-01b2.jpg", "http://cms.taradonne.com/uploads/food-022.jpg", "http://cms.taradonne.com/uploads/food-032.jpg", "http://cms.taradonne.com/uploads/food-042.jpg", "http://cms.taradonne.com/uploads/food-052.jpg", "http://cms.taradonne.com/uploads/food-062.jpg", "http://cms.taradonne.com/uploads/food-071.jpg", "http://cms.taradonne.com/uploads/food-083.jpg", "http://cms.taradonne.com/uploads/food-092.jpg", "http://cms.taradonne.com/uploads/food-102.jpg", "http://cms.taradonne.com/uploads/food-112.jpg", "http://cms.taradonne.com/uploads/food-122.jpg", "http://cms.taradonne.com/uploads/food-131.jpg", "http://cms.taradonne.com/uploads/food-141.jpg", "http://cms.taradonne.com/uploads/food-152.jpg", "http://cms.taradonne.com/uploads/food-163.jpg", "http://cms.taradonne.com/uploads/food-172.jpg", "http://cms.taradonne.com/uploads/food-18.jpg", "http://cms.taradonne.com/uploads/food-191.jpg", "http://cms.taradonne.com/uploads/food-201.jpg", "http://cms.taradonne.com/uploads/food-21.jpg", "http://cms.taradonne.com/uploads/food-22.jpg", "http://cms.taradonne.com/uploads/food-231.jpg", "http://cms.taradonne.com/uploads/food-241.jpg", "http://cms.taradonne.com/uploads/food-25.jpg", "http://cms.taradonne.com/uploads/food-26.jpg", "http://cms.taradonne.com/uploads/food-27.jpg", "http://cms.taradonne.com/uploads/food-281.jpg", "http://cms.taradonne.com/uploads/food-291.jpg", "http://cms.taradonne.com/uploads/food-301.jpg", "http://cms.taradonne.com/uploads/food-31.jpg", "http://cms.taradonne.com/uploads/food-321.jpg", "http://cms.taradonne.com/uploads/food-33.jpg", "http://cms.taradonne.com/uploads/food-341.jpg", "http://cms.taradonne.com/uploads/food-351.jpg", "http://cms.taradonne.com/uploads/food-36.jpg", "http://cms.taradonne.com/uploads/food-371.jpg", "http://cms.taradonne.com/uploads/food-381.jpg", "http://cms.taradonne.com/uploads/food-39.jpg", "http://cms.taradonne.com/uploads/food-401.jpg", "http://cms.taradonne.com/uploads/food-41.jpg", "http://cms.taradonne.com/uploads/food-42.jpg", "http://cms.taradonne.com/uploads/food-431.jpg", "http://cms.taradonne.com/uploads/food-441.jpg", "http://cms.taradonne.com/uploads/food-451.jpg", "http://cms.taradonne.com/uploads/food-461.jpg", "http://cms.taradonne.com/uploads/food-47.jpg", "http://cms.taradonne.com/uploads/food-48.jpg", "http://cms.taradonne.com/uploads/food-491.jpg", "http://cms.taradonne.com/uploads/food-501.jpg", "http://cms.taradonne.com/uploads/food-511.jpg", "http://cms.taradonne.com/uploads/food-52.jpg", "http://cms.taradonne.com/uploads/food-531.jpg"];
             }
 
