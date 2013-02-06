@@ -1,0 +1,367 @@
+@-webkit-keyframes ui-spinner-rotate-right {
+  /* line 58, ../../scss/_ui-spinner.scss */
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  /* line 59, ../../scss/_ui-spinner.scss */
+  25% {
+    -webkit-transform: rotate(180deg);
+  }
+
+  /* line 60, ../../scss/_ui-spinner.scss */
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+
+  /* line 61, ../../scss/_ui-spinner.scss */
+  75% {
+    -webkit-transform: rotate(360deg);
+  }
+
+  /* line 62, ../../scss/_ui-spinner.scss */
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-webkit-keyframes ui-spinner-rotate-left {
+  /* line 66, ../../scss/_ui-spinner.scss */
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  /* line 67, ../../scss/_ui-spinner.scss */
+  25% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  /* line 68, ../../scss/_ui-spinner.scss */
+  50% {
+    -webkit-transform: rotate(180deg);
+  }
+
+  /* line 69, ../../scss/_ui-spinner.scss */
+  75% {
+    -webkit-transform: rotate(180deg);
+  }
+
+  /* line 70, ../../scss/_ui-spinner.scss */
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes ui-spinner-rotate-right {
+  /* line 74, ../../scss/_ui-spinner.scss */
+  0% {
+    -moz-transform: rotate(0deg);
+  }
+
+  /* line 75, ../../scss/_ui-spinner.scss */
+  25% {
+    -moz-transform: rotate(180deg);
+  }
+
+  /* line 76, ../../scss/_ui-spinner.scss */
+  50% {
+    -moz-transform: rotate(180deg);
+  }
+
+  /* line 77, ../../scss/_ui-spinner.scss */
+  75% {
+    -moz-transform: rotate(360deg);
+  }
+
+  /* line 78, ../../scss/_ui-spinner.scss */
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@-moz-keyframes ui-spinner-rotate-left {
+  /* line 82, ../../scss/_ui-spinner.scss */
+  0% {
+    -moz-transform: rotate(0deg);
+  }
+
+  /* line 83, ../../scss/_ui-spinner.scss */
+  25% {
+    -moz-transform: rotate(0deg);
+  }
+
+  /* line 84, ../../scss/_ui-spinner.scss */
+  50% {
+    -moz-transform: rotate(180deg);
+  }
+
+  /* line 85, ../../scss/_ui-spinner.scss */
+  75% {
+    -moz-transform: rotate(180deg);
+  }
+
+  /* line 86, ../../scss/_ui-spinner.scss */
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+
+@keyframes ui-spinner-rotate-right {
+  /* line 90, ../../scss/_ui-spinner.scss */
+  0% {
+    transform: rotate(0deg);
+  }
+
+  /* line 91, ../../scss/_ui-spinner.scss */
+  25% {
+    transform: rotate(180deg);
+  }
+
+  /* line 92, ../../scss/_ui-spinner.scss */
+  50% {
+    transform: rotate(180deg);
+  }
+
+  /* line 93, ../../scss/_ui-spinner.scss */
+  75% {
+    transform: rotate(360deg);
+  }
+
+  /* line 94, ../../scss/_ui-spinner.scss */
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ui-spinner-rotate-left {
+  /* line 98, ../../scss/_ui-spinner.scss */
+  0% {
+    transform: rotate(0deg);
+  }
+
+  /* line 99, ../../scss/_ui-spinner.scss */
+  25% {
+    transform: rotate(0deg);
+  }
+
+  /* line 100, ../../scss/_ui-spinner.scss */
+  50% {
+    transform: rotate(180deg);
+  }
+
+  /* line 101, ../../scss/_ui-spinner.scss */
+  75% {
+    transform: rotate(180deg);
+  }
+
+  /* line 102, ../../scss/_ui-spinner.scss */
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* line 110, ../../scss/_ui-spinner.scss */
+.ui-spinner {
+  position: relative;
+  border-radius: 100%;
+}
+/* line 114, ../../scss/_ui-spinner.scss */
+.ui-spinner .side {
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+}
+/* line 120, ../../scss/_ui-spinner.scss */
+.ui-spinner .side .fill {
+  border-radius: 999px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-animation-iteration-count: infinite;
+  -moz-animation-iteration-count: infinite;
+  -ms-animation-iteration-count: infinite;
+  -o-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  -webkit-animation-timing-function: linear;
+  -moz-animation-timing-function: linear;
+  -ms-animation-timing-function: linear;
+  -o-animation-timing-function: linear;
+  animation-timing-function: linear;
+}
+/* line 130, ../../scss/_ui-spinner.scss */
+.ui-spinner .side-left {
+  left: 0;
+}
+/* line 133, ../../scss/_ui-spinner.scss */
+.ui-spinner .side-left .fill {
+  left: 100%;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  -webkit-animation-name: ui-spinner-rotate-left;
+  -moz-animation-name: ui-spinner-rotate-left;
+  -ms-animation-name: ui-spinner-rotate-left;
+  -o-animation-name: ui-spinner-rotate-left;
+  animation-name: ui-spinner-rotate-left;
+  -webkit-transform-origin: 0 50%;
+  -moz-transform-origin: 0 50%;
+  -ms-transform-origin: 0 50%;
+  -o-transform-origin: 0 50%;
+  transform-origin: 0 50%;
+}
+/* line 142, ../../scss/_ui-spinner.scss */
+.ui-spinner .side-right {
+  left: 50%;
+}
+/* line 145, ../../scss/_ui-spinner.scss */
+.ui-spinner .side-right .fill {
+  left: -100%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  -webkit-animation-name: ui-spinner-rotate-right;
+  -moz-animation-name: ui-spinner-rotate-right;
+  -ms-animation-name: ui-spinner-rotate-right;
+  -o-animation-name: ui-spinner-rotate-right;
+  animation-name: ui-spinner-rotate-right;
+  -webkit-transform-origin: 100% 50%;
+  -moz-transform-origin: 100% 50%;
+  -ms-transform-origin: 100% 50%;
+  -o-transform-origin: 100% 50%;
+  transform-origin: 100% 50%;
+}
+
+/* line 26, ../../scss/_ui-spinner.scss */
+.ui-spinner {
+  width: 46px;
+  height: 46px;
+  background: #dddddd;
+}
+/* line 31, ../../scss/_ui-spinner.scss */
+.ui-spinner .side .fill {
+  background: #3c76ca;
+  -webkit-animation-duration: 3s;
+  -moz-animation-duration: 3s;
+  -ms-animation-duration: 3s;
+  -o-animation-duration: 3s;
+  animation-duration: 3s;
+  opacity: 0.8;
+}
+/* line 39, ../../scss/_ui-spinner.scss */
+.ui-spinner:after {
+  content: "";
+  background: transparent;
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  top: 9px;
+  left: 9px;
+  display: block;
+}
+
+/* line 9, ../../scss/main.scss */
+body {
+  font-size: 12px;
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  background-color: #FCFCFC;
+  text-align: center;
+  margin: 50px 0 0 0;
+  width: 960px;
+  margin: 50px auto;
+}
+/* line 12, ../../scss/main.scss */
+body table {
+  font-size: 12px;
+}
+/* line 21, ../../scss/main.scss */
+body h1 {
+  color: #7DF0C9;
+  font-size: 7.0em;
+  margin: 0;
+}
+/* line 27, ../../scss/main.scss */
+body h2 {
+  color: #77E4BF;
+  font-size: 1.2em;
+}
+/* line 32, ../../scss/main.scss */
+body h3 {
+  color: #6CCFAD;
+  font-size: 1.2em;
+}
+/* line 37, ../../scss/main.scss */
+body .threesixty-wrapper {
+  margin: 30px auto;
+  width: 960px;
+  position: relative;
+}
+/* line 41, ../../scss/main.scss */
+body .threesixty-wrapper .threesixty {
+  display: block;
+  width: 960px;
+  height: 540px;
+}
+/* line 26, ../../scss/_ui-spinner.scss */
+body .threesixty-wrapper .threesixty .ui-spinner {
+  width: 50px;
+  height: 50px;
+  background: #c2fccc;
+}
+/* line 31, ../../scss/_ui-spinner.scss */
+body .threesixty-wrapper .threesixty .ui-spinner .side .fill {
+  background: #55fc5a;
+  -webkit-animation-duration: 3s;
+  -moz-animation-duration: 3s;
+  -ms-animation-duration: 3s;
+  -o-animation-duration: 3s;
+  animation-duration: 3s;
+  opacity: 0.8;
+}
+/* line 39, ../../scss/_ui-spinner.scss */
+body .threesixty-wrapper .threesixty .ui-spinner:after {
+  content: "";
+  background: transparent;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  top: 10px;
+  left: 10px;
+  display: block;
+}
+/* line 47, ../../scss/main.scss */
+body .threesixty-wrapper .threesixty .ui-spinner {
+  margin: 270px auto;
+}
+/* line 52, ../../scss/main.scss */
+body .threesixty-wrapper .label {
+  margin: 20px auto;
+  display: block;
+}
+/* line 58, ../../scss/main.scss */
+body .download-btn {
+  margin: 15px 0 15px 0;
+}
+/* line 60, ../../scss/main.scss */
+body .download-btn h1 {
+  cursor: pointer;
+  padding: 15px 20px 15px 20px;
+  display: inline-block;
+  background: #C0CFCF;
+  color: #FCFCFC;
+  font-size: 3.0em;
+}
+/* line 67, ../../scss/main.scss */
+body .download-btn h1:hover {
+  background: #94A2A2;
+}
+/* line 74, ../../scss/main.scss */
+body .examples {
+  display: inline-block;
+  margin: 20px 0 0 0;
+}
+/* line 85, ../../scss/main.scss */
+body .social {
+  margin: 35px 0 35px 0;
+}
