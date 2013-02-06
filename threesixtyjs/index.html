@@ -1,0 +1,62 @@
+<html>
+    <head>
+        <title>ThreeSixty</title>
+        <link rel="stylesheet" href="assets/css/main.css">
+    </head>
+    <body>
+
+        <h1>threesixty</h1>
+        <h2>a jQuery plugin for creating draggable 360s</h2>
+
+        <div class="threesixty-wrapper">
+
+            <div class="threesixty" data-path="assets/img/src/gem{index}.JPG" data-count="61">
+                <!-- put your preloader here -->
+                <div class="ui-spinner">
+                    <span class="side side-left">
+                        <span class="fill"></span>
+                    </span>
+                    <span class="side side-right">
+                        <span class="fill"></span>
+                    </span>
+                </div>
+                <!-- end preloader -->
+            </div>
+
+            <img src="assets/img/label.png" alt="" class="label"/>
+
+        </div>
+
+        <a href="https://github.com/nick-jonas/threesixtyjs/tarball/master" class="download-btn"><h1>download</h1></a></div><br/>
+
+        <div class="examples">
+            <div class="html">
+                <h3>html</h3>
+                <script src="https://gist.github.com/nick-jonas/4724870.js"></script>
+            </div>
+            <div class="js">
+                <h3>js</h3>
+                <script src="https://gist.github.com/nick-jonas/4724852.js"></script>
+            </div>
+        </div>
+
+        <div class="social">
+            <iframe src="http://ghbtns.com/github-btn.html?user=nick-jonas&repo=threesixtyjs&type=fork&count=true"
+  allowtransparency="true" frameborder="0" scrolling="0" width="53" height="20"></iframe>
+
+              <iframe src="http://ghbtns.com/github-btn.html?user=nick-jonas&type=follow"
+              allowtransparency="true" frameborder="0" scrolling="0" width="132" height="20"></iframe>
+
+        </div>
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="assets/js/threesixty.jquery.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('.threesixty').threeSixty({
+                    dragDirection: 'horizontal'
+                });
+            });
+        </script>
+    </body>
+</html>
