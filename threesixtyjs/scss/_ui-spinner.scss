@@ -1,0 +1,153 @@
+// # CSS Spinner
+// Optional 6 parameters for mixin 'ui-spinner'.
+// Defaults are as follows.
+
+$default-hole-color: transparent;
+$default-size: 46px;
+$default-bkg-color-light: #ddd;
+$default-bkg-color-dark: #3c76ca;
+$default-opacity: .8;
+$default-duration: 3s;
+
+// Need to remove the units to do some math.
+@function strip-units($number) {
+  @return $number / ($number * 0 + 1);
+}
+
+// Mixin for the ui-spinner. Paramters use defaults from above if none passed in.
+@mixin ui-spinner(
+    $hole-color: $default-hole-color,
+    $size: $default-size,
+    $bkg-color-light: $default-bkg-color-light,
+    $bkg-color-dark: $default-bkg-color-dark,
+    $opacity: $default-opacity,
+    $duration: $default-duration
+    ) {
+    .ui-spinner {
+        width: $size;
+        height: $size;
+        background: $bkg-color-light;
+
+        .side .fill {
+            background: $bkg-color-dark;
+            @include experimental(animation-duration, $duration);
+            opacity: $opacity;
+        }
+
+        // This is the 'hole' that creates the ring. It's size is determined by the
+        // size of the spinner.
+        &:after {
+            $hole-size: round((strip-units($size)*.6)) + px;
+            $hole-position: round((strip-units($size)*.2)) + px;
+            content: "";
+            background: $hole-color;
+            position: absolute;
+            width: $hole-size;
+            height: $hole-size;
+            border-radius: 50%;
+            top: $hole-position;
+            left: $hole-position;
+            display: block;
+        }
+    }
+}
+
+// Keyframes for each browser that flip the boxes around.
+
+@-webkit-keyframes ui-spinner-rotate-right {
+    0% {    -webkit-transform: rotate(0deg); }
+    25% {   -webkit-transform: rotate(180deg); }
+    50% {   -webkit-transform: rotate(180deg); }
+    75% {   -webkit-transform: rotate(360deg); }
+    100% {  -webkit-transform: rotate(360deg); }
+}
+
+@-webkit-keyframes ui-spinner-rotate-left {
+    0% {    -webkit-transform: rotate(0deg); }
+    25% {   -webkit-transform: rotate(0deg); }
+    50% {   -webkit-transform: rotate(180deg); }
+    75% {   -webkit-transform: rotate(180deg); }
+    100% {  -webkit-transform: rotate(360deg); }
+}
+
+@-moz-keyframes ui-spinner-rotate-right {
+    0% {    -moz-transform: rotate(0deg); }
+    25% {   -moz-transform: rotate(180deg); }
+    50% {   -moz-transform: rotate(180deg); }
+    75% {   -moz-transform: rotate(360deg); }
+    100% {  -moz-transform: rotate(360deg); }
+}
+
+@-moz-keyframes ui-spinner-rotate-left {
+    0% {    -moz-transform: rotate(0deg); }
+    25% {   -moz-transform: rotate(0deg); }
+    50% {   -moz-transform: rotate(180deg); }
+    75% {   -moz-transform: rotate(180deg); }
+    100% {  -moz-transform: rotate(360deg); }
+}
+
+@keyframes ui-spinner-rotate-right {
+    0% {    transform: rotate(0deg); }
+    25% {   transform: rotate(180deg); }
+    50% {   transform: rotate(180deg); }
+    75% {   transform: rotate(360deg); }
+    100% {  transform: rotate(360deg); }
+}
+
+@keyframes ui-spinner-rotate-left {
+    0% {    transform: rotate(0deg); }
+    25% {   transform: rotate(0deg); }
+    50% {   transform: rotate(180deg); }
+    75% {   transform: rotate(180deg); }
+    100% {  transform: rotate(360deg); }
+}
+
+
+// The basic CSS for the spinner. Each '.side' takes turns spinning
+// to reveal the left/right side filling or emptying.
+// The damn thing is so complicated I barely understand it anymore.
+
+.ui-spinner {
+    position: relative;
+    border-radius: 100%;
+
+    .side {
+        width: 50%;
+        height: 100%;
+        overflow: hidden;
+        position: absolute;
+
+       .fill {
+            border-radius: 999px;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            @include experimental(animation-iteration-count, infinite);
+            @include experimental(animation-timing-function, linear);
+        }
+    }
+
+    .side-left {
+        left: 0;
+
+        .fill {
+            left: 100%;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            @include experimental(animation-name, ui-spinner-rotate-left);
+            @include experimental(transform-origin, 0 50%);
+        }
+    }
+
+    .side-right {
+        left: 50%;
+
+        .fill {
+            left: -100%;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            @include experimental(animation-name, ui-spinner-rotate-right);
+            @include experimental(transform-origin, 100% 50%);
+        }
+    }
+}
