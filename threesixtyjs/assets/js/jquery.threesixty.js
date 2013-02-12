@@ -34,7 +34,7 @@ var scope,
         this._name = pluginName;
 
         // make sure string input for drag direction is valid
-        if(dragDirections.indexOf(options.dragDirection) < 0){
+        if($.inArray(options.dragDirection, dragDirections) >= 0){
             options.dragDirection = defaults.dragDirection;
         }
 
@@ -46,6 +46,48 @@ var scope,
     $.fn.destroy = function(){
         $(this).removeData();
         $el.html('');
+    };
+
+    $.fn.nextFrame = ThreeSixty.prototype.nextFrame = function(){
+        $(this).each(function(i){
+            var $this = $(this),
+                val = $this.data('lastVal') || 0,
+                thisTotal = $this.data('count');
+
+            val = val + 1;
+
+            $this.data('lastVal', val);
+
+            if(val >= thisTotal) val = val % (thisTotal - 1);
+            else if(val <= -thisTotal) val = val % (thisTotal - 1);
+            if(val > 0) val = thisTotal - val;
+
+            val = Math.abs(val);
+
+            $this.find('.threesixty-frame').css({display: 'none'});
+            $this.find('.threesixty-frame:eq(' + val + ')').css({display: 'block'});
+        });
+    };
+
+    $.fn.prevFrame = ThreeSixty.prototype.prevFrame = function(){
+        $(this).each(function(i){
+            var $this = $(this),
+                val = $this.data('lastVal') || 0,
+                thisTotal = $this.data('count');
+
+            val = val - 1;
+
+            $this.data('lastVal', val);
+
+            if(val >= thisTotal) val = val % (thisTotal - 1);
+            else if(val <= -thisTotal) val = val % (thisTotal - 1);
+            if(val > 0) val = thisTotal - val;
+
+            val = Math.abs(val);
+
+            $this.find('.threesixty-frame').css({display: 'none'});
+            $this.find('.threesixty-frame:eq(' + val + ')').css({display: 'block'});
+        });
     };
 
 
@@ -70,6 +112,8 @@ var scope,
             data.push({'path': path, 'count': count});
             total += count;
         });
+
+        _disableTextSelectAndDragIE8();
 
         this.initLoad();
     };
@@ -132,21 +176,21 @@ var scope,
         $el.each(function(i){
             var $this =$(this);
             // mouse down
-            $this.bind('mousedown', function(e){
+            $this.mousedown(function(e){
                 e.preventDefault();
                 thisTotal = $(this).data('count');
                 $downElem = $(this);
                 startY = e.screenY;
                 lastVal = $downElem.data('lastVal') || 0;
+                lastX = $downElem.data('lastX') || 0;
                 lastY = $downElem.data('lastY') || 0;
                 isMouseDown = true;
             });
 
             // mouse up
-            $(document, 'html', 'body').bind('mouseup', that.onMouseUp);
-            $(document).on('blur', that.onMouseUp);
-
-            $('body').bind('mousemove', function(e){
+            $(document, 'html', 'body').mouseup(that.onMouseUp);
+            $(document).blur(that.onMouseUp);
+            $('body').mousemove(function(e){
                 if(isMouseDown){
                     var x = e.screenX,
                         y = e.screenY,
@@ -169,13 +213,19 @@ var scope,
                     lastVal = val;
                     lastY = y;
                     lastX = x;
+
                     $downElem.data('lastY', lastY);
                     $downElem.data('lastX', lastX);
                     $downElem.data('lastVal', lastVal);
+
                     if(val >= thisTotal) val = val % (thisTotal - 1);
                     else if(val <= -thisTotal) val = val % (thisTotal - 1);
                     if(val > 0) val = thisTotal - val;
+
                     val = Math.abs(val);
+
+                    console.log(val, lastVal);
+
                     $downElem.find('.threesixty-frame').css({display: 'none'});
                     $downElem.find('.threesixty-frame:eq(' + val + ')').css({display: 'block'});
                 }
@@ -185,6 +235,21 @@ var scope,
 
     ThreeSixty.prototype.onMouseUp = function(e) {
         isMouseDown = false;
+    };
+
+    /**
+     * Disables text selection and dragging on IE8 and below.
+     */
+    var _disableTextSelectAndDragIE8 = function() {
+      // Disable text selection.
+      document.body.onselectstart = function() {
+          return false;
+      };
+
+      // Disable dragging.
+      document.body.ondragstart = function() {
+          return false;
+      };
     };
 
 

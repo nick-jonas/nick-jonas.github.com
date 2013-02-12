@@ -1,0 +1,91 @@
+@import "compass/css3/transition";
+@import "ui-spinner";
+@import "webfont";
+@import "ui";
+
+$img-width: 960px;
+$img-height: 540px;
+
+@include ui-spinner;
+
+body{
+
+    font-size:12px;
+    table{ font-size:12px; }
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: 300;
+    background-color:#FCFCFC;
+    text-align:center;
+    margin:50px 0 0 0;
+    width:$img-width;
+    margin:50px auto;
+
+    h1{
+        color:#7DF0C9;
+        font-size:7.0em;
+        margin:0;
+    }
+
+    h2{
+        color:#77E4BF;
+        font-size:1.2em;
+    }
+
+    h3{
+        color:#6CCFAD;
+        font-size:1.2em;
+    }
+
+    .threesixty-wrapper{
+        margin:30px auto;
+        width: $img-width;
+        position:relative;
+        .threesixty{
+            display:block;
+            width:$img-width;
+            height:$img-height;
+            $preload-size: 50px;
+            @include ui-spinner(transparent, $preload-size, #C2FCCC, #55FC5A);
+            .ui-spinner{
+                margin:$img-height / 2 auto;
+            }
+        }
+
+        .label{
+            margin:20px auto;
+            display:block;
+        }
+    }
+
+    .download-btn{
+        margin:15px 0 15px 0;
+        h1{
+            cursor:pointer;
+            padding:15px 20px 15px 20px;
+            display:inline-block;
+            background:#C0CFCF;
+            color:#FCFCFC;
+            font-size:3.0em;
+            &:hover{
+                background:#94A2A2;
+            }
+        }
+
+    }
+
+    .examples{
+        display:inline-block;
+        margin:20px 0 0 0;
+        .html{
+            // width:300px;
+        }
+        .js{
+            // width:300px;
+        }
+    }
+
+    .social{
+        margin:35px 0 35px 0;
+    }
+}
+
