@@ -29,6 +29,7 @@ $(document).ready(function(){
 
 * `dragDirection` : `horizontal` || `vertical`, `horizontal` is default.
 * `useKeys` : `true` || `false`, `false` is default
+* `draggable` : `true` || `false`, `true` is default
 
 #### api
 
@@ -50,7 +51,12 @@ Step to the previous frame.
 * ~~Add arrow key functionality as an option (default:off)~~
 * ~~Expose nextFrame() & prevFrame() methods, allowing users to connect UI controls~~
 * build flick/toss physics (can this be done smoothly?)
+<<<<<<< HEAD
+* add touch/swipe support
 
+=======
+* ~~add touch/swipe support~~
+>>>>>>> added touch support, bump to v0.1.0
 
 ## In the Wild
 
