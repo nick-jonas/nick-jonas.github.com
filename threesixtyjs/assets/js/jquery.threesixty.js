@@ -1,6 +1,6 @@
 /*!
  * ThreeSixty: A jQuery plugin for generating a draggable 360 preview from an image sequence.
- * Version: 0.0.1
+ * Version: 0.1.1
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
@@ -13,7 +13,8 @@ var scope,
     pluginName = 'threeSixty',
     defaults = {
         dragDirection: 'horizontal',
-        useKeys: false
+        useKeys: false,
+        draggable: true
     },
     dragDirections = ['horizontal', 'vertical'],
     options = {},
@@ -35,7 +36,7 @@ var scope,
         this._name = pluginName;
 
         // make sure string input for drag direction is valid
-        if($.inArray(options.dragDirection, dragDirections) >= 0){
+        if($.inArray(options.dragDirection, dragDirections) < 0){
             options.dragDirection = defaults.dragDirection;
         }
 
@@ -177,6 +178,22 @@ var scope,
         var that = this;
         $el.each(function(i){
             var $this =$(this);
+
+            // add draggable events
+            if(options.draggable){
+                // if touch events supported, use
+                if(typeof document.ontouchstart !== 'undefined' &&
+                    typeof document.ontouchmove !== 'undefined' &&
+                    typeof document.ontouchend !== 'undefined' &&
+                    typeof document.ontouchcancel !== 'undefined'){
+                    var elem = $this.get()[0];
+                    elem.addEventListener('touchstart', that.onTouchStart);
+                    elem.addEventListener('touchmove', that.onTouchMove);
+                    elem.addEventListener('touchend', that.onTouchEnd);
+                    elem.addEventListener('touchcancel', that.onTouchEnd);
+                }
+            }
+
             // mouse down
             $this.mousedown(function(e){
                 e.preventDefault();
@@ -198,46 +215,71 @@ var scope,
             $(document, 'html', 'body').mouseup(that.onMouseUp);
             $(document).blur(that.onMouseUp);
             $('body').mousemove(function(e){
-                if(isMouseDown){
-                    var x = e.screenX,
-                        y = e.screenY,
-                        val = 0;
-
-                    if(options.dragDirection === 'vertical'){
-                        if(y > lastY){
-                            val = lastVal + 1;
-                        }else{
-                            val = lastVal - 1;
-                        }
-                    }else{
-                        if(x > lastX){
-                            val = lastVal + 1;
-                        }else{
-                            val = lastVal - 1;
-                        }
-                    }
-
-                    lastVal = val;
-                    lastY = y;
-                    lastX = x;
-
-                    $downElem.data('lastY', lastY);
-                    $downElem.data('lastX', lastX);
-                    $downElem.data('lastVal', lastVal);
-
-                    if(val >= thisTotal) val = val % (thisTotal - 1);
-                    else if(val <= -thisTotal) val = val % (thisTotal - 1);
-                    if(val > 0) val = thisTotal - val;
-
-                    val = Math.abs(val);
-
-                    console.log(val, lastVal);
-
-                    $downElem.find('.threesixty-frame').css({display: 'none'});
-                    $downElem.find('.threesixty-frame:eq(' + val + ')').css({display: 'block'});
-                }
+                that.onMove(e.screenX, e.screenY);
             });
         });
+    };
+
+    ThreeSixty.prototype.onTouchStart = function(e) {
+        var touch = e.touches[0];
+        e.preventDefault();
+        $downElem = $(e.target).parent();
+        thisTotal = $downElem.data('count');
+        startX = touch.pageX;
+        startY = touch.pageY;
+        lastVal = $downElem.data('lastVal') || 0;
+        lastX = $downElem.data('lastX') || 0;
+        lastY = $downElem.data('lastY') || 0;
+        isMouseDown = true;
+    };
+
+    ThreeSixty.prototype.onTouchMove = function(e) {
+        e.preventDefault();
+        var touch = e.touches[0];
+        scope.onMove(touch.pageX, touch.pageY);
+    };
+
+    ThreeSixty.prototype.onTouchEnd = function(e) {
+
+    };
+
+    ThreeSixty.prototype.onMove = function(screenX, screenY){
+        if(isMouseDown){
+            var x = screenX,
+                y = screenY,
+                val = 0;
+
+            if(options.dragDirection === 'vertical'){
+                if(y > lastY){
+                    val = lastVal + 1;
+                }else{
+                    val = lastVal - 1;
+                }
+            }else{
+                if(x > lastX){
+                    val = lastVal + 1;
+                }else{
+                    val = lastVal - 1;
+                }
+            }
+
+            lastVal = val;
+            lastY = y;
+            lastX = x;
+
+            $downElem.data('lastY', lastY);
+            $downElem.data('lastX', lastX);
+            $downElem.data('lastVal', lastVal);
+
+            if(val >= thisTotal) val = val % (thisTotal - 1);
+            else if(val <= -thisTotal) val = val % (thisTotal - 1);
+            if(val > 0) val = thisTotal - val;
+
+            val = Math.abs(val);
+
+            $downElem.find('.threesixty-frame').css({display: 'none'});
+            $downElem.find('.threesixty-frame:eq(' + val + ')').css({display: 'block'});
+        }
     };
 
     ThreeSixty.prototype.onKeyDown = function(e) {
