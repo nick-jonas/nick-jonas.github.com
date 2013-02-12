@@ -21,12 +21,14 @@ The data-path attribute `assets/img/src/gem{index}.jpg` is the path to the image
 ```javascript
 $(document).ready(function(){
     $('.threesixty').threeSixty({
-        dragDirection: 'horizontal'
+        dragDirection: 'horizontal',
+        useKeys: false
     });
 });
 ```
 
-The options for dragDirection are `horizontal` and `vertical`, horizontal being the default.
+* `dragDirection` : `horizontal` || `vertical`, `horizontal` is default.
+* `useKeys` : `true` || `false`, `false` is default
 
 #### api
 
@@ -45,9 +47,9 @@ Step to the previous frame.
 ## To Do
 
 * Add mouse-wheel functionality as an option (default:off)
-* Add arrow key functionality as an option (default:off)
+* ~~Add arrow key functionality as an option (default:off)~~
 * ~~Expose nextFrame() & prevFrame() methods, allowing users to connect UI controls~~
-* build flick/toss physics
+* build flick/toss physics (can this be done smoothly?)
 
 
 ## In the Wild
