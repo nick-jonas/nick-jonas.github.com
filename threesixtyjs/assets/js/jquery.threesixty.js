@@ -12,7 +12,8 @@
 var scope,
     pluginName = 'threeSixty',
     defaults = {
-        dragDirection: 'horizontal'
+        dragDirection: 'horizontal',
+        useKeys: false
     },
     dragDirections = ['horizontal', 'vertical'],
     options = {},
@@ -43,7 +44,8 @@ var scope,
 
     // PUBLIC API -----------------------------------------------------
 
-    $.fn.destroy = function(){
+    $.fn.destroy = ThreeSixty.prototype.destroy = function(){
+        if(options.useKeys === true) $(document).unbind('keydown', this.onKeyDown);
         $(this).removeData();
         $el.html('');
     };
@@ -187,6 +189,11 @@ var scope,
                 isMouseDown = true;
             });
 
+            // arrow keys
+            if(options.useKeys === true){
+                $(document).bind('keydown', that.onKeyDown);
+            }
+
             // mouse up
             $(document, 'html', 'body').mouseup(that.onMouseUp);
             $(document).blur(that.onMouseUp);
@@ -231,6 +238,17 @@ var scope,
                 }
             });
         });
+    };
+
+    ThreeSixty.prototype.onKeyDown = function(e) {
+        switch(e.keyCode){
+            case 37: // left
+                $el.prevFrame();
+                break;
+            case 39: // right
+                $el.nextFrame();
+                break;
+        }
     };
 
     ThreeSixty.prototype.onMouseUp = function(e) {
