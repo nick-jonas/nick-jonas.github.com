@@ -2,6 +2,7 @@
     <head>
         <title>ThreeSixty</title>
         <link rel="stylesheet" href="assets/css/main.css">
+        <link href="webfonts/ss-pika.css" rel="stylesheet" />
     </head>
     <body>
 
@@ -21,6 +22,11 @@
                     </span>
                 </div>
                 <!-- end preloader -->
+            </div>
+
+            <div class="ui">
+                <div class="next ss-icon">plus</div>
+                <div class="prev ss-icon">minus</div>
             </div>
 
             <img src="assets/img/label.png" alt="" class="label"/>
@@ -50,11 +56,22 @@
         </div>
 
         <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="assets/js/threesixty.jquery.js"></script>
+        <script src="assets/js/jquery.threesixty.js"></script>
         <script>
             $(document).ready(function(){
-                $('.threesixty').threeSixty({
+
+                var $threeSixty = $('.threesixty');
+
+                $threeSixty.threeSixty({
                     dragDirection: 'horizontal'
+                });
+
+                $('.next').click(function(){
+                    $threeSixty.nextFrame();
+                });
+
+                $('.prev').click(function(){
+                    $threeSixty.prevFrame();
                 });
             });
         </script>
