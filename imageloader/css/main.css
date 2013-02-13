@@ -1,0 +1,91 @@
+/* @import must be at top of file, otherwise CSS will not work */
+@import url("//hello.myfonts.net/count/25cb92");
+
+@font-face {font-family: 'BrandonText-BoldItalic';src: url('webfonts/25CB92_0_0.eot');src: url('webfonts/25CB92_0_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_0_0.woff') format('woff'),url('webfonts/25CB92_0_0.ttf') format('truetype');}
+@font-face {font-family: 'BrandonText-Bold';src: url('webfonts/25CB92_1_0.eot');src: url('webfonts/25CB92_1_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_1_0.woff') format('woff'),url('webfonts/25CB92_1_0.ttf') format('truetype');}
+@font-face {font-family: 'BrandonText-Regular';src: url('webfonts/25CB92_2_0.eot');src: url('webfonts/25CB92_2_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_2_0.woff') format('woff'),url('webfonts/25CB92_2_0.ttf') format('truetype');}
+
+
+/*
+
+font-family:BrandonText-Bold,Futura,Helvetica,Arial,sans-serif;
+font-family:BrandonText-BoldItalic,Futura,Helvetica,Arial,sans-serif;
+font-family:BrandonText-Regular,Futura,Helvetica,Arial,sans-serif;
+
+*/
+
+body{
+    background: #EBEBEB;
+}
+
+a{
+    text-decoration:none;
+    color:#282828;
+}
+
+#loader-line{
+    position:absolute;
+    top:50%;
+    border-color:#282828;
+}
+
+#images{
+    list-style-type: none;
+    margin:40px auto;
+    padding:0;
+    width:800px;
+}
+#images li{
+    display:inline-block;
+    width:200px;
+    height:200px;
+    overflow:hidden;
+    opacity:0;
+}
+
+img{
+    width:100%;
+}
+
+.headline{
+    font-family:BrandonText-Bold,Futura,Helvetica,Arial,sans-serif;
+    text-transform:uppercase;
+    color:#282828;
+    text-align:center;
+    font-size:4.0em;
+    padding-top:50px;
+    display:inline-block;
+    border-bottom:1px solid #282828;
+    position:absolute;
+    left:50%;
+    margin-left:-265px;
+}
+
+.subheadline{
+    font-family:BrandonText-Regular,Futura,Helvetica,Arial,sans-serif;
+    text-transform:uppercase;
+    color:#282828;
+    text-align:center;
+    font-size:1.6em;
+    padding-top:160px;
+}
+
+#links{
+    list-style-type:none;
+    text-align:center;
+    margin-left:-30px;
+    margin-top:30px;
+}
+
+#links li{
+    display:inline;
+    font-size:1.5em;
+}
+
+#github{
+    margin-right:15px;
+}
+
+#download{
+    margin-left:15px;
+}
