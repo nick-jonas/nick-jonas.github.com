@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html class='no-js'>
+  <head>
+    <meta charset='UTF-8' />
+    <title>SS Social v1.002b</title>
+    <link rel="stylesheet" href="webfonts/ss-social.css">
+    <style>
+      body{background:#fff;border-top:5px solid #455860;color:#455860;font-family:"Helvetica Neue", helvetica, sans-serif;font-size:17px;line-height:1.5;margin:0;}
+      h2{font-size:48px;line-height:1;margin:.333em 0 0;}
+      h3{font-size:30px;font-weight:300;line-height:1.2;margin:4px 0 36px;}
+      a{color:#59C54A;font-weight:600;}
+      table{border-collapse:collapse;border-spacing:0;width:100%;}
+      table tr{border-top:1px solid #e6eae8;}
+      table td{padding-bottom:15px;padding-top:18px;vertical-align:top;}
+      .set{margin-bottom:84px;position:relative;}
+      .encode,.keyword{width:41.667%;}
+      .keyword a.note {text-decoration:none;}
+      .css,.keyword li{white-space:nowrap;}
+      .ss-icon{padding-left:0;width:16.667%;font-size:30px;}
+      .encode{font-size:14px;text-align:center;padding-right:20px;line-height:1.8;}
+      .unicode,.off,button{color:#949FA2;}
+      .views {position:absolute;top:5px;right:0;}
+      .toggle-list {color:#455860;}
+      .toggle-list, .toggle-grid {cursor:pointer;outline:0;border:0;background:none;width:auto!important;padding:0;}
+      p.note{font-size:14px;}
+      td ul{list-style:none;margin:0;padding:0;}
+      .wrapper{max-width:432px;margin:120px auto 132px;padding:0 6.25%;}
+      footer{background-color:#455860;color:#fff;overflow:hidden;position:relative;font-size:14px;padding:48px 0 60px;}
+      footer ul{margin:0;padding:0;list-style:none;}
+      footer li{float:left;margin-right:1em;}
+      footer .copyright{float:right;margin:0;position:relative;}
+      footer span, footer span a{vertical-align:top;}
+      footer .wrapper{margin:auto;}
+      footer a{color:#fff;text-decoration:none;font-weight:600;}
+      footer a:hover,footer a:active{color:#fff;text-decoration:underline;}
+      #placeholder {width:72px;}
+      body.grid .wrapper{max-width:80%;}
+      body.grid .toggle-list {color:#949FA2;}
+      body.grid .toggle-grid {color:#455860;}
+      body.grid table tr{display:block;float:left;width:auto;max-width:72px;cursor:pointer;height:78px;}
+      body.grid table {position:relative;}
+      body.grid .ss-icon{text-align:center;padding-right:0;width:72px;}
+      body.grid .encode, body.grid .keyword{border:0;clip:rect(0 0 0 0);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;}
+      body.grid tr.open{border-top:0;position:absolute;max-width:99em;height:auto;background:#455860;box-shadow:3px 3px 1px rgba(0,0,0,0.2);border-radius:3px;cursor:default;color:#fff;-webkit-box-shadow:3px 3px 1px rgba(0,0,0,0.2);-moz-box-shadow:3px 3px 1px rgba(0,0,0,0.2);-ms-box-shadow:3px 3px 1px rgba(0,0,0,0.2);box-shadow:3px 3px 1px rgba(0,0,0,0.2);-webkit-border-radius:3px;-moz-border-radius:3px;-ms-border-radius:3px;border-radius:3px;}
+      body.grid tr.open .encode, body.grid tr.open .keyword{clip:auto;height:auto;margin:0;overflow:visible;width:auto;position:static;padding:0 20px 20px;display:block;text-align:left;}
+      body.grid .open .keyword{top:70px;}
+      @media screen and (max-width:760px){.wrapper{margin-top:84px;}footer .wrapper{margin:auto;}}
+      @media screen and (max-width:540px){h2{font-size:32px;}h3{font-size:22px;}}
+      .off,.on{cursor:pointer;}
+    </style>
+  </head>
+  <body>
+
+    <div class="wrapper centered">
+
+      <section class="set">
+        <h2>SS Social</h2>
+        <h3><span class="on">Regular</span> <span class="off">Circle</span></h3>
+        <table cellpadding="10px">
+        <tr>
+          <td class='ss-icon'>
+            &#xF610;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-facebook</li>
+              <li class='unicode'>&amp;#xF610;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>facebook</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF611;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-twitter</li>
+              <li class='unicode'>&amp;#xF611;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>twitter</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF612;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-linkedin</li>
+              <li class='unicode'>&amp;#xF612;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>linkedin</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF613;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-googleplus</li>
+              <li class='unicode'>&amp;#xF613;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>google+</li>
+              <li>google + <a href='#spaces' class='note'>*</a></li>
+              <li>googleplus</li>
+              <li>google plus <a href='#spaces' class='note'>*</a></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF620;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-tumblr</li>
+              <li class='unicode'>&amp;#xF620;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>tumblr</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF621;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-wordpress</li>
+              <li class='unicode'>&amp;#xF621;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>wordpress</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF622;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-blogger</li>
+              <li class='unicode'>&amp;#xF622;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>blogger</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF623;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-posterous</li>
+              <li class='unicode'>&amp;#xF623;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>posterous</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF630;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-youtube</li>
+              <li class='unicode'>&amp;#xF630;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>youtube</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF631;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-vimeo</li>
+              <li class='unicode'>&amp;#xF631;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>vimeo</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF640;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-flickr</li>
+              <li class='unicode'>&amp;#xF640;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>flickr</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF641;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-instagram</li>
+              <li class='unicode'>&amp;#xF641;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>instagram</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF650;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-pinterest</li>
+              <li class='unicode'>&amp;#xF650;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>pinterest</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF651;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-svpply</li>
+              <li class='unicode'>&amp;#xF651;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>svpply</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF652;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-readmill</li>
+              <li class='unicode'>&amp;#xF652;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>readmill</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF653;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-dropbox</li>
+              <li class='unicode'>&amp;#xF653;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>dropbox</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF660;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-dribbble</li>
+              <li class='unicode'>&amp;#xF660;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>dribbble</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF661;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-behance</li>
+              <li class='unicode'>&amp;#xF661;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>behance</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF670;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-github</li>
+              <li class='unicode'>&amp;#xF670;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>github</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF671;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-octocat</li>
+              <li class='unicode'>&amp;#xF671;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>githuboctocat</li>
+              <li>github octocat <a href='#spaces' class='note'>*</a></li>
+              <li>octocat</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF672;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-stackoverflow</li>
+              <li class='unicode'>&amp;#xF672;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>stackoverflow</li>
+              <li>stack overflow <a href='#spaces' class='note'>*</a></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF680;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-paypal</li>
+              <li class='unicode'>&amp;#xF680;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>paypal</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF681;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-kickstarter</li>
+              <li class='unicode'>&amp;#xF681;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>kickstarter</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF690;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-foursquare</li>
+              <li class='unicode'>&amp;#xF690;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>foursquare</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF6A0;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-skype</li>
+              <li class='unicode'>&amp;#xF6A0;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>skype</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF6B0;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-rdio</li>
+              <li class='unicode'>&amp;#xF6B0;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>rdio</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF6B1;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-spotify</li>
+              <li class='unicode'>&amp;#xF6B1;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>spotify</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xF6B2;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-lastfm</li>
+              <li class='unicode'>&amp;#xF6B2;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>lastfm</li>
+              <li>last fm <a href='#spaces' class='note'>*</a></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#x2709;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-mail</li>
+              <li class='unicode'>&amp;#x2709;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>email</li>
+              <li>envelope</li>
+              <li>mail</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#x1F44D;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-like</li>
+              <li class='unicode'>&amp;#x1F44D;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>approve</li>
+              <li>like</li>
+              <li>thumbsup</li>
+              <li>thumbs up <a href='#spaces' class='note'>*</a></li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <td class='ss-icon'>
+            &#xE310;
+          </td>
+          <td class='encode'>
+            <ul>
+              <li class='css'>.ss-rss</li>
+              <li class='unicode'>&amp;#xE310;</li>
+            </ul>
+          </td>
+          <td class='keyword'>
+            <ul>
+              <li>rss</li>
+            </ul>
+          </td>
+        </tr>
+        </table>
+
+      </section>
+
+      <p class='note'><a name='spaces'>*</a>Note: Keywords with spaces are <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=761442" style="font-weight:400;">not currently supported in Firefox</a>.</p>
+
+    </div>
+    <footer>
+      <div class="wrapper">
+        <nav>
+          <ul>
+            <li>
+              <a href="http://symbolset.com">Symbolset</a>
+            </li>
+            <li>
+              <a href="http://symbolset.com/license">License</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="copyright">
+          <span>
+            Copyright © 2012
+            <a href="http://oak.is" target="_blank">Oak Studios LLC</a>
+          </span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Optional Javascript for legacy browser support -->
+    <script src="webfonts/ss-social.js"></script>
+
+    <script>
+      try {
+        (function(){
+          // Select unicode values onclick.
+          function c(e){e.stopPropagation();if(document.body.createTextRange){var a=document.body.createTextRange();a.moveToElementText(this);a.select()}else if(window.getSelection){var b=window.getSelection(),a=document.createRange();a.selectNodeContents(this);b.removeAllRanges();b.addRange(a)}}for(var b=Array.prototype.slice.call(document.getElementsByClassName("unicode")),l=Array.prototype.slice.call(document.getElementsByTagName("li")),a=Array.prototype.slice.call(document.getElementsByClassName("css")),b=b.concat(a),b=b.concat(l),a=b.length-1;0<=a;a--)b[a].addEventListener("click",c,!1);
+
+          // Toggle Icon Style
+          (function(){
+            var spans = document.getElementsByTagName('span')
+              , on = document.getElementsByClassName('on')[0]
+              , off = document.getElementsByClassName('off')[0]
+              , icons = document.getElementsByClassName('ss-icon')
+              , toggleOn = function (e){
+                if (e.target === off){
+                  removeClass(off, 'off');
+                  addClass(on, 'off');
+                  for (var i = icons.length - 1; i >= 0; i--) {
+                    icons[i].setAttribute('style', 'font-weight:bold;')
+                  };
+                } else {
+                  addClass(off, 'off');
+                  removeClass(on, 'off');
+                  for (var i = icons.length - 1; i >= 0; i--) {
+                    icons[i].setAttribute('style', '')
+                  };
+                };
+              };
+            if (on && off){
+              for (var i = spans.length - 1; i >= 0; i--) {
+                spans[i].addEventListener('click', toggleOn, false);
+              }
+            }
+          })();
+
+          // Toggle View Style
+          var grid = document.getElementsByClassName('toggle-grid')[0]
+            , list = document.getElementsByClassName('toggle-list')[0]
+            , body = document.body
+
+          grid.addEventListener('click', function(e){
+            e.preventDefault()
+            addClass(body, 'grid')
+          }, false)
+
+          list.addEventListener('click', function(e){
+            e.preventDefault()
+            removeClass(body, 'grid')
+          }, false)
+
+          // Grid view active
+          var tr = document.getElementsByTagName('tr')
+
+          document.addEventListener('click', hideDetails, false);
+
+          function hideDetails() {
+            var placeholder = document.getElementById('placeholder');
+            if (placeholder) {
+              placeholder.parentNode.removeChild(placeholder);
+            }
+            (function(){
+              for (var i = tr.length - 1; i >= 0; i--) {
+                tr[i].setAttribute('style','')
+                removeClass(tr[i], 'open')
+              };
+            })();
+          }
+
+          function showDetails(e){
+            var item = e.target.parentNode;
+            if (hasClass(body, 'grid') && !hasClass(item,  'open')) {
+              e.stopPropagation()
+              hideDetails()
+
+              var left = item.offsetLeft
+                , top = item.offsetTop
+
+              item.setAttribute('style', 'top:'+top+'px;left:'+left+'px;')
+              addClass(item, 'open')
+              var placeholder = document.createElement('tr')
+              placeholder = item.parentNode.insertBefore(placeholder, item)
+              placeholder.id = 'placeholder'
+            }
+          };
+
+          (function(){
+            for (var i = tr.length - 1; i >= 0; i--) {
+              tr[i].addEventListener('click', showDetails, false)
+            };
+          })();
+
+          // Helpers
+          function hasClass(elem, classname) {
+            var regexp = new RegExp('\\b' + classname + '\\b', 'g')
+            return elem.className.match(regexp)
+          }
+          function addClass(elem, classname) {
+            if (hasClass(elem, classname)) return
+            elem.className = elem.className + ' ' + classname
+            elem.className = elem.className.replace(/^\s+|\s+$/g, '')
+          }
+          function removeClass(elem, classname) {
+            if (!hasClass(elem, classname)) return
+            elem.className = elem.className.replace(classname, '')
+          }
+
+        })();
+      } catch(err) {}
+    </script>
+  </body>
+</html>
