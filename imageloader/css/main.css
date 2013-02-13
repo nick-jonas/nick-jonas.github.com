@@ -23,12 +23,6 @@ a{
     color:#282828;
 }
 
-#loader-line{
-    position:absolute;
-    top:50%;
-    border-color:#282828;
-}
-
 #images{
     list-style-type: none;
     margin:40px auto;
@@ -55,10 +49,17 @@ img{
     font-size:4.0em;
     padding-top:50px;
     display:inline-block;
-    border-bottom:1px solid #282828;
     position:absolute;
     left:50%;
     margin-left:-265px;
+
+}
+
+.headline .preloader{
+    width:0;
+    border-bottom:1px solid #282828;
+    position: absolute;
+    left:0px;
 }
 
 .subheadline{
