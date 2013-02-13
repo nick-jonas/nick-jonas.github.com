@@ -52,12 +52,21 @@ img{
     position:absolute;
     left:50%;
     margin-left:-265px;
+}
 
+#complete-icon{
+    position:absolute;
+    left:50%;
+    top:130px;
+    margin-left:280px;
+    color:#4DFF32;
+    font-size:1.5em;
+    opacity:0;
 }
 
 .headline .preloader{
     width:0;
-    border-bottom:1px solid #282828;
+    border-bottom:1px solid #4DFF32;
     position: absolute;
     left:0px;
 }

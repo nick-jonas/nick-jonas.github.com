@@ -15,7 +15,11 @@
         <div class="headline">imageloader.js
             <span class="preloader"></span>
         </div>
+
         <div class="subheadline">a jquery plugin for preloading images</div>
+
+        <div id="complete-icon" class="icon ss-icon">like</div>
+
         <ul id="links">
             <li id="github"><a href="http://www.github.com/nick-jonas/imageloader"><span class="icon ss-icon ss-social">octocat</span></a></li>
             <li id="download"><a href="http://www.github.com/nick-jonas/imageloader/tarball/master"><span class="icon ss-icon">downloadcloud</span></a></li>
@@ -23,7 +27,6 @@
         <ul id="images"></ul>
 
         <script>
-
             var $line = $('.headline .preloader'),
                 $images =$('#images');
 
@@ -34,7 +37,7 @@
                     smoothing: true,
 
                     onComplete: function(images){
-
+                        $('#complete-icon').animate({opacity:1}, 600);
                     },
 
                     onUpdate: function(ratio, image){
@@ -51,9 +54,6 @@
                     }
                 });
             });
-
-
         </script>
     </body>
-</html>>
 </html>
