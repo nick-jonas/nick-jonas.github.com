@@ -74,7 +74,7 @@ var that = this,
      * Get section that is mostly visible on screen
      * @return {jQuery el}
      */
-    var _getMostVisibleWindow = function(){
+    var _getCurrentWindow = $.fn.getCurrentWindow = function(){
         var maxPerc = 0,
             maxElem = $windows[0];
         $.each($windows, function(i){
@@ -122,7 +122,7 @@ var that = this,
         // check for when user has stopped scrolling, & do stuff
         if(options.snapping){
             t = setTimeout(function(){
-                var $visibleWindow = _getMostVisibleWindow(), // visible window
+                var $visibleWindow = _getCurrentWindow(), // visible window
                     scrollTo = $visibleWindow.offset().top, // top of visible window
                     completeCalled = false;
                 // animate to top of visible window
