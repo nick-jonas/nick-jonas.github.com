@@ -19,7 +19,7 @@
 }
 
 /* COLORS ---------------------------------------------------------- */
-/* line 1, ../scss/demo/_demo.scss */
+/* line 1, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 h1 {
   font-family: BrandonText-Bold, Futura, Helvetica, Arial, sans-serif;
   font-size: 6.0em;
@@ -27,7 +27,7 @@ h1 {
   text-align: center;
 }
 
-/* line 7, ../scss/demo/_demo.scss */
+/* line 7, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 h2 {
   font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
   font-size: 1.4em;
@@ -35,14 +35,14 @@ h2 {
   color: #333a3e;
 }
 
-/* line 13, ../scss/demo/_demo.scss */
+/* line 13, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 p {
   font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
   color: #333a3e;
   font-size: 1.4em;
 }
 
-/* line 18, ../scss/demo/_demo.scss */
+/* line 18, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 pre {
   color: #d5d7dd;
   color: #bcbdc0;
@@ -50,14 +50,14 @@ pre {
   line-height: 1.6em;
 }
 
-/* line 26, ../scss/demo/_demo.scss */
+/* line 26, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(1) .content {
   position: absolute;
   top: 50%;
   width: 100%;
   margin-top: -170px;
 }
-/* line 31, ../scss/demo/_demo.scss */
+/* line 31, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(1) .content i {
   font-size: 4.0em;
   width: 100%;
@@ -65,16 +65,16 @@ pre {
   display: inline-block;
   color: #6ab29f;
 }
-/* line 38, ../scss/demo/_demo.scss */
+/* line 38, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(1) .content h1 {
   margin: 0;
 }
-/* line 41, ../scss/demo/_demo.scss */
+/* line 41, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(1) .content h2 {
   padding: 0 30px;
 }
 
-/* line 49, ../scss/demo/_demo.scss */
+/* line 49, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(2) .content {
   position: absolute;
   top: 50%;
@@ -82,33 +82,33 @@ pre {
   margin-top: -180px;
   margin-left: -160px;
 }
-/* line 55, ../scss/demo/_demo.scss */
+/* line 55, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(2) .content h2 {
   color: #d5d7dd;
   text-align: left;
 }
-/* line 58, ../scss/demo/_demo.scss */
+/* line 58, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(2) .content h2 .highlight {
   color: white;
 }
 
-/* line 67, ../scss/demo/_demo.scss */
+/* line 67, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(3) ul {
   list-style-type: none;
 }
-/* line 68, ../scss/demo/_demo.scss */
+/* line 68, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(3) .content {
   position: absolute;
   top: 50%;
   width: 100%;
   margin-top: -230px;
 }
-/* line 73, ../scss/demo/_demo.scss */
+/* line 73, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(3) .content h2 {
   text-align: center;
   font-size: 3.0em;
 }
-/* line 77, ../scss/demo/_demo.scss */
+/* line 77, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(3) .content .explanation {
   font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
   color: #333a3e;
@@ -116,12 +116,12 @@ pre {
   text-align: center;
   padding: 0 15%;
 }
-/* line 83, ../scss/demo/_demo.scss */
+/* line 83, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(3) .content .explanation li {
   color: #d5d7dd;
 }
 
-/* line 92, ../scss/demo/_demo.scss */
+/* line 92, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(4) pre {
   position: absolute;
   top: 50%;
@@ -129,23 +129,23 @@ pre {
   margin: -220px 0 0 -450px;
 }
 
-/* line 102, ../scss/demo/_demo.scss */
+/* line 102, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(5) .content {
   position: absolute;
   top: 50%;
   left: 50%;
-  margin: -300px 0 0 -450px;
+  margin: -350px 0 0 -450px;
 }
-/* line 108, ../scss/demo/_demo.scss */
+/* line 108, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(5) h1 {
   color: #333a3e;
 }
-/* line 111, ../scss/demo/_demo.scss */
+/* line 111, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(5) pre {
   color: #333a3e;
 }
 
-/* line 119, ../scss/demo/_demo.scss */
+/* line 119, /Users/Jonas/Projects/repo/windows/scss/demo/_demo.scss */
 .window:nth-child(6) .content {
   position: absolute;
   top: 50%;
@@ -155,27 +155,27 @@ pre {
 }
 
 /* CSS Document */
-/* line 4, ../scss/demo/_btn.scss */
+/* line 4, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 ::selection {
   background-color: #55595c;
   color: #fff;
   text-shadow: 0 1px 0 #000;
 }
 
-/* line 9, ../scss/demo/_btn.scss */
+/* line 9, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 ::-moz-selection {
   background-color: #55595c;
   color: #fff;
   text-shadow: 0 1px 0 #000;
 }
 
-/* line 38, ../scss/demo/_btn.scss */
+/* line 38, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 #wrap {
   width: 500px;
   margin: 13% auto 0;
 }
 
-/* line 49, ../scss/demo/_btn.scss */
+/* line 49, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 #btn-wrap {
   position: relative;
   padding: 5px;
@@ -196,7 +196,7 @@ pre {
   box-shadow: 0 1px 0 #37373b;
 }
 
-/* line 69, ../scss/demo/_btn.scss */
+/* line 69, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 span.title {
   color: #d6d6e7;
   font: 15px/49px BrandonText-Bold, Futura, Helvetica, Arial, sans-serif;
@@ -221,13 +221,13 @@ span.title {
   text-align: center;
 }
 
-/* line 93, ../scss/demo/_btn.scss */
+/* line 93, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 #btn-wrap:hover span.title {
   font-size: 14px;
   width: 135px;
 }
 
-/* line 98, ../scss/demo/_btn.scss */
+/* line 98, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 #info {
   position: absolute;
   height: 50px;
@@ -246,7 +246,7 @@ span.title {
   z-index: 4;
 }
 
-/* line 116, ../scss/demo/_btn.scss */
+/* line 116, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 #info p {
   width: 65px;
   margin: 12px 17px 0 0;
@@ -257,7 +257,7 @@ span.title {
   text-align: left;
 }
 
-/* line 126, ../scss/demo/_btn.scss */
+/* line 126, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 .boxtuffs {
   color: #7c7c84;
   font: 12px Helvetica, Arial, sans-serif;
@@ -268,7 +268,7 @@ span.title {
   -o-transition: all .2s ease-out;
 }
 
-/* line 136, ../scss/demo/_btn.scss */
+/* line 136, /Users/Jonas/Projects/repo/windows/scss/demo/_btn.scss */
 .boxtuffs:hover {
   color: #27896a;
 }
