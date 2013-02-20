@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <title>windows</title>
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="js/jquery.windows.js"></script>
+
+        <link rel="stylesheet" href="css/webfonts/ss-social/webfonts/ss-social.css"/>
+        <link rel="stylesheet" href="css/webfonts/ss-pika/webfonts/ss-pika.css"/>
+        <link rel="stylesheet" href="css/main.css">
+
+    </head>
+    <body>
+
+        <!-- NOTE: each "window" is a section element with class .window -->
+
+        <section id="0" class="window">
+            <div class="content">
+                    <i class="ss-icon">windows</i>
+                    <h1>windows</h1>
+                    <h2>a handy, loosely-coupled jQuery plugin for full-screen scrolling windows</h2>
+            </div>
+        </section>
+
+        <section id="1" class="window">
+            <div class="content">
+                <h2>
+                project root<br/>
+                | -- css<br/>
+                | -- | -- main.css (compiled)<br/>
+                | -- js<br/>
+                | -- | -- <span class="highlight">jquery.windows.js</span><br/>
+                | -- scss<br/>
+                | -- | -- <span class="highlight">main.scss</span><br/>
+                | -- <span class="highlight">index.html</span>
+                </h2>
+            </div>
+        </section>
+
+        <section id="2" class="window">
+            <div class="content">
+                <h2>How it works</h2>
+                <div class="explanation">This is a light bootstrap that sets up:
+                    <ul>
+                        <li>- the basic SASS for sequential full screen windows</li>
+                        <li>- a jQuery plugin for managing their positions as the user scrolls</li>
+                    </ul>
+                    The plugin simply opens up a handy API for position management, provides callbacks, and will allow for window snapping.  No CSS is applied to the callee.
+                </div>
+            </div>
+        </section>
+
+        <section id="3" class="window">
+            <pre>
+                $('.window').windows({
+                    snapping: true,
+                    snapSpeed: 500,
+                    snapInterval: 1100,
+                    onScroll: function(scrollPos){
+                        // scrollPos:Number
+                    },
+                    onSnapComplete: function($el){
+                        // after window ($el) snaps into place
+                    },
+                    onWindowEnter: function($el){
+                        // when new window ($el) enters viewport
+                    }
+                });
+            </pre>
+        </section>
+
+        <section id="4" class="window">
+            <div class="content">
+                <h1>api</h1>
+                <pre>
+                    // returns ratio 0-1
+                    $('.window:eq(0)').ratioVisible();
+
+                    // returns boolean of whether or not is visible on screen
+                    $('.window:eq(0)').isOnScreen();
+                </pre>
+            </div>
+        </section>
+
+        <section id="5" class="window">
+            <div class="content">
+                <a href="http://www.github.com/nick-jonas/windows/tarball/master" title="Download Me!" id="btn-wrap">
+                    <span class="title">Download Me</span>
+                    <div id="info">
+                        <p>
+                            <strong>Version 1.1</strong>
+                            <span>3.5 MB</span>
+                        </p>
+                    </div>
+                </a>
+
+                <iframe src="http://ghbtns.com/github-btn.html?user=nick-jonas&repo=windows&type=fork&count=true&size=large" allowtransparency="true" frameborder="0" scrolling="0" width="156px" height="30px" style="margin:50px 0 0 50px;"></iframe>
+
+            </div>
+        </section>
+
+        <script>
+
+            $(document).ready(function(){
+
+                var $windows = $('.window');
+
+                $windows.windows({
+                    snapping: true,
+                    snapSpeed: 500,
+                    snapInterval: 1100,
+                    onScroll: function(s){},
+                    onSnapComplete: function($el){},
+                    onWindowEnter: function($el){}
+                });
+
+            });
+        </script>
+
+    </body>
+</html>
