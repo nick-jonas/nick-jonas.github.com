@@ -1,0 +1,126 @@
+h1{
+    font-family:$bold;
+    font-size:6.0em;
+    color:$teal;
+    text-align:center;
+}
+h2{
+    font-family:$regular;
+    font-size:1.4em;
+    text-align:center;
+    color:$dark-gray;
+}
+p{
+    font-family:$regular;
+    color:$dark-gray;
+    font-size:1.4em;
+}
+pre{
+    color:$light-gray;
+    color: #bcbdc0;
+    font-size: 1.4em;
+    line-height: 1.6em;
+}
+
+.window:nth-child(1){
+    .content{
+        position:absolute;
+        top:50%;
+        width:100%;
+        margin-top:-170px;
+        i{
+            font-size:4.0em;
+            width:100%;
+            text-align:center;
+            display:inline-block;
+            color:$light-green;
+        }
+        h1{
+            margin:0;
+        }
+        h2{
+            padding:0 30px;
+        }
+    }
+}
+
+
+.window:nth-child(2){
+    .content{
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin-top:-180px;
+        margin-left: -160px;
+        h2{
+            color:$light-gray;
+            text-align:left;
+            .highlight{
+                color:white;
+            }
+        }
+    }
+}
+
+// explanation
+.window:nth-child(3){
+    ul{ list-style-type:none; }
+    .content{
+        position:absolute;
+        top:50%;
+        width:100%;
+        margin-top:-230px;
+        h2{
+            text-align:center;
+            font-size:3.0em;
+        }
+        .explanation{
+            font-family:$regular;
+            color:$dark-gray;
+            font-size:1.4em;
+            text-align:center;
+            padding:0 15%;
+            li{
+                color:$light-gray;
+            }
+        }
+    }
+}
+
+// code example
+.window:nth-child(4){
+    pre{
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin:-220px 0 0 -450px;
+    }
+}
+
+// api
+.window:nth-child(5){
+    .content{
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin:-300px 0 0 -450px;
+    }
+    h1{
+        color:$dark-gray;
+    }
+    pre{
+        color:$dark-gray;
+    }
+}
+
+
+//download
+.window:nth-child(6){
+    .content{
+        position:absolute;
+        top:50%;
+        left:50%;
+        margin:-100px 0 0 -100px;
+        text-align:center;
+    }
+}
