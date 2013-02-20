@@ -1,0 +1,10 @@
+/* FONTS ---------------------------------------------------------- */
+@import url("http://hello.myfonts.net/count/25cb92");
+
+@font-face {font-family: 'BrandonText-BoldItalic';src: url('webfonts/25CB92_0_0.eot');src: url('webfonts/25CB92_0_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_0_0.woff') format('woff'),url('webfonts/25CB92_0_0.ttf') format('truetype');}
+@font-face {font-family: 'BrandonText-Bold';src: url('webfonts/25CB92_1_0.eot');src: url('webfonts/25CB92_1_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_1_0.woff') format('woff'),url('webfonts/25CB92_1_0.ttf') format('truetype');}
+@font-face {font-family: 'BrandonText-Regular';src: url('webfonts/25CB92_2_0.eot');src: url('webfonts/25CB92_2_0.eot?#iefix') format('embedded-opentype'),url('webfonts/25CB92_2_0.woff') format('woff'),url('webfonts/25CB92_2_0.ttf') format('truetype');}
+
+$bold: BrandonText-Bold,Futura,Helvetica,Arial,sans-serif;
+$bold-italic: BrandonText-BoldItalic,Futura,Helvetica,Arial,sans-serif;
+$regular: BrandonText-Regular,Futura,Helvetica,Arial,sans-serif;

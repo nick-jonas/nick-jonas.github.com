@@ -1,0 +1,323 @@
+@import url("http://hello.myfonts.net/count/25cb92");
+/* FONTS ---------------------------------------------------------- */
+@font-face {
+  font-family: 'BrandonText-BoldItalic';
+  src: url("webfonts/25CB92_0_0.eot");
+  src: url("webfonts/25CB92_0_0.eot?#iefix") format("embedded-opentype"), url("webfonts/25CB92_0_0.woff") format("woff"), url("webfonts/25CB92_0_0.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'BrandonText-Bold';
+  src: url("webfonts/25CB92_1_0.eot");
+  src: url("webfonts/25CB92_1_0.eot?#iefix") format("embedded-opentype"), url("webfonts/25CB92_1_0.woff") format("woff"), url("webfonts/25CB92_1_0.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: 'BrandonText-Regular';
+  src: url("webfonts/25CB92_2_0.eot");
+  src: url("webfonts/25CB92_2_0.eot?#iefix") format("embedded-opentype"), url("webfonts/25CB92_2_0.woff") format("woff"), url("webfonts/25CB92_2_0.ttf") format("truetype");
+}
+
+/* COLORS ---------------------------------------------------------- */
+/* line 1, ../scss/demo/_demo.scss */
+h1 {
+  font-family: BrandonText-Bold, Futura, Helvetica, Arial, sans-serif;
+  font-size: 6.0em;
+  color: #1babb7;
+  text-align: center;
+}
+
+/* line 7, ../scss/demo/_demo.scss */
+h2 {
+  font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
+  font-size: 1.4em;
+  text-align: center;
+  color: #333a3e;
+}
+
+/* line 13, ../scss/demo/_demo.scss */
+p {
+  font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
+  color: #333a3e;
+  font-size: 1.4em;
+}
+
+/* line 18, ../scss/demo/_demo.scss */
+pre {
+  color: #d5d7dd;
+  color: #bcbdc0;
+  font-size: 1.4em;
+  line-height: 1.6em;
+}
+
+/* line 26, ../scss/demo/_demo.scss */
+.window:nth-child(1) .content {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin-top: -170px;
+}
+/* line 31, ../scss/demo/_demo.scss */
+.window:nth-child(1) .content i {
+  font-size: 4.0em;
+  width: 100%;
+  text-align: center;
+  display: inline-block;
+  color: #6ab29f;
+}
+/* line 38, ../scss/demo/_demo.scss */
+.window:nth-child(1) .content h1 {
+  margin: 0;
+}
+/* line 41, ../scss/demo/_demo.scss */
+.window:nth-child(1) .content h2 {
+  padding: 0 30px;
+}
+
+/* line 49, ../scss/demo/_demo.scss */
+.window:nth-child(2) .content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -180px;
+  margin-left: -160px;
+}
+/* line 55, ../scss/demo/_demo.scss */
+.window:nth-child(2) .content h2 {
+  color: #d5d7dd;
+  text-align: left;
+}
+/* line 58, ../scss/demo/_demo.scss */
+.window:nth-child(2) .content h2 .highlight {
+  color: white;
+}
+
+/* line 67, ../scss/demo/_demo.scss */
+.window:nth-child(3) ul {
+  list-style-type: none;
+}
+/* line 68, ../scss/demo/_demo.scss */
+.window:nth-child(3) .content {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  margin-top: -230px;
+}
+/* line 73, ../scss/demo/_demo.scss */
+.window:nth-child(3) .content h2 {
+  text-align: center;
+  font-size: 3.0em;
+}
+/* line 77, ../scss/demo/_demo.scss */
+.window:nth-child(3) .content .explanation {
+  font-family: BrandonText-Regular, Futura, Helvetica, Arial, sans-serif;
+  color: #333a3e;
+  font-size: 1.4em;
+  text-align: center;
+  padding: 0 15%;
+}
+/* line 83, ../scss/demo/_demo.scss */
+.window:nth-child(3) .content .explanation li {
+  color: #d5d7dd;
+}
+
+/* line 92, ../scss/demo/_demo.scss */
+.window:nth-child(4) pre {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -220px 0 0 -450px;
+}
+
+/* line 102, ../scss/demo/_demo.scss */
+.window:nth-child(5) .content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -300px 0 0 -450px;
+}
+/* line 108, ../scss/demo/_demo.scss */
+.window:nth-child(5) h1 {
+  color: #333a3e;
+}
+/* line 111, ../scss/demo/_demo.scss */
+.window:nth-child(5) pre {
+  color: #333a3e;
+}
+
+/* line 119, ../scss/demo/_demo.scss */
+.window:nth-child(6) .content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -100px 0 0 -100px;
+  text-align: center;
+}
+
+/* CSS Document */
+/* line 4, ../scss/demo/_btn.scss */
+::selection {
+  background-color: #55595c;
+  color: #fff;
+  text-shadow: 0 1px 0 #000;
+}
+
+/* line 9, ../scss/demo/_btn.scss */
+::-moz-selection {
+  background-color: #55595c;
+  color: #fff;
+  text-shadow: 0 1px 0 #000;
+}
+
+/* line 38, ../scss/demo/_btn.scss */
+#wrap {
+  width: 500px;
+  margin: 13% auto 0;
+}
+
+/* line 49, ../scss/demo/_btn.scss */
+#btn-wrap {
+  position: relative;
+  padding: 5px;
+  margin: 0 auto;
+  width: 230px;
+  height: 50px;
+  display: block;
+  text-decoration: none;
+  margin-bottom: 30px;
+  background: #242428;
+  background: -webkit-gradient(linear, 0 bottom, 0 top, from(#2d2d30), to(#17171a));
+  background: -moz-linear-gradient(-90deg, #17171a, #2d2d30);
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  -webkit-box-shadow: 0 1px 0 #37373b;
+  -moz-box-shadow: 0 1px 0 #37373b;
+  box-shadow: 0 1px 0 #37373b;
+}
+
+/* line 69, ../scss/demo/_btn.scss */
+span.title {
+  color: #d6d6e7;
+  font: 15px/49px BrandonText-Bold, Futura, Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  height: 50px;
+  width: 230px;
+  display: block;
+  position: relative;
+  -webkit-box-shadow: 0 -1px 0 #8d8d94, 0 1px 1px #0b0b0c;
+  -moz-box-shadow: 0 -1px 0 #8d8d94, 0 1px 1px #0b0b0c;
+  box-shadow: 0 -1px 0 #8d8d94, 0 1px 1px #0b0b0c;
+  background: #52525c;
+  background: -webkit-gradient(linear, 0 bottom, 0 top, from(#383840), to(#5a5a64));
+  background: -moz-linear-gradient(-90deg, #5a5a64, #383840);
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  z-index: 5;
+  -webkit-transition: width .2s ease-out;
+  -moz-transition: width .2s ease-out;
+  -o-transition: width .2s ease-out;
+  text-align: center;
+}
+
+/* line 93, ../scss/demo/_btn.scss */
+#btn-wrap:hover span.title {
+  font-size: 14px;
+  width: 135px;
+}
+
+/* line 98, ../scss/demo/_btn.scss */
+#info {
+  position: absolute;
+  height: 50px;
+  width: 230px;
+  top: 5px;
+  right: 4px;
+  -webkit-box-shadow: 0 -1px 0 #404042, 0 1px 1px #0b0b0c;
+  -moz-box-shadow: 0 -1px 0 #404042, 0 1px 1px #0b0b0c;
+  box-shadow: 0 -1px 0 #404042, 0 1px 1px #0b0b0c;
+  background: #2a2a2d;
+  background: -webkit-gradient(linear, 0 bottom, 0 top, from(#212124), to(#2a2a2d));
+  background: -moz-linear-gradient(-90deg, #2a2a2d, #212124);
+  -webkit-border-radius: 50px;
+  -moz-border-radius: 50px;
+  border-radius: 50px;
+  z-index: 4;
+}
+
+/* line 116, ../scss/demo/_btn.scss */
+#info p {
+  width: 65px;
+  margin: 12px 17px 0 0;
+  position: absolute;
+  right: 0;
+  color: #7c7c84;
+  font: 11px/12px Helvetica, Arial, sans-serif;
+  text-align: left;
+}
+
+/* line 126, ../scss/demo/_btn.scss */
+.boxtuffs {
+  color: #7c7c84;
+  font: 12px Helvetica, Arial, sans-serif;
+  text-shadow: 0 -1px 0 black;
+  text-decoration: none;
+  -webkit-transition: all .2s ease-out;
+  -moz-transition: all .2s ease-out;
+  -o-transition: all .2s ease-out;
+}
+
+/* line 136, ../scss/demo/_btn.scss */
+.boxtuffs:hover {
+  color: #27896a;
+}
+
+/* line 6, ../scss/main.scss */
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+/* line 11, ../scss/main.scss */
+.window {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(1) {
+  background: #d5d7dd;
+  top: 0%;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(2) {
+  background: #1babb7;
+  top: 100%;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(3) {
+  background: #6ab29f;
+  top: 200%;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(4) {
+  background: #333a3e;
+  top: 300%;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(5) {
+  background: #d0482b;
+  top: 400%;
+}
+
+/* line 18, ../scss/main.scss */
+.window:nth-child(6) {
+  background: #231f20;
+  top: 500%;
+}

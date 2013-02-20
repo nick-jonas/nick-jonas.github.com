@@ -1,0 +1,23 @@
+@import "demo/fonts";
+@import "demo/colors";
+@import "demo/demo";
+@import "demo/btn";
+
+html, body{
+    margin:0;
+    padding:0;
+}
+
+.window{
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+
+@for $i from 1 through 6{
+    .window:nth-child(#{$i}){
+        background:nth($colors, $i);
+        top:($i - 1) * 100%;
+    }
+}
+
