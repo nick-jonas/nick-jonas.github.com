@@ -3,17 +3,20 @@
     position:relative;
     margin:30px 0 0 0;
 
-    .ss-icon{
-        font-size:4.0em;
+    .next{
+        font-size:2.0em;
         position:absolute;
         display:inline-block;
         color:#CDD3D1;
         cursor:pointer;
-    }
-    .next{
         right:0px;
     }
     .prev{
+        font-size:2.0em;
+        position:absolute;
+        display:inline-block;
+        color:#CDD3D1;
+        cursor:pointer;
         left:0px;
     }
 }

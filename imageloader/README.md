@@ -30,9 +30,8 @@ $(document).ready(function(){
 
 * `urls` : Array of image URLs to load
     * type: Array
-* `onComplete` : callback function that is called when load is finished with images that were loaded successfully
+* `onComplete` : callback function that is called when load is finished
     * type: Function
-    * params: Array
 * `onUpdate` : callback function that is called when load is finished
     * type: Function
     * params: ratio:Number (0-1), image:String (path to image, can be null if smoothing=true)
