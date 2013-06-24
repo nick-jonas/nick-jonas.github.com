@@ -68,7 +68,6 @@ var that = this,
             $currImage = _getImageObjFromIndex(currentIndex),
             $nextImage = _getImageObjFromIndex(nextIndex);
 
-        console.log(currentIndex + ' > ' + nextIndex);
 
         if(!isAnimating){
             isAnimating = true;
@@ -293,6 +292,7 @@ var that = this,
                 });
             }else{ // use standard mouse events
                 $(document, 'html', 'body').mouseup(_onMouseUp);
+                $(document).on("blur", _onMouseUp);
                 $('.slider-img').mousedown(_onMouseDown).mouseup(_onMouseUp).mousemove(_onMouseMove);
             }
         }
@@ -327,7 +327,8 @@ var that = this,
      * @return {String}
      */
     var _getDivHtml = function(index){
-        return '<div id="img-' + index + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + options.sizeConstraint + ';"></div>';
+        var size = (options.sizeConstraint === 'contain-adjacent') ? 'contain' : options.sizeConstraint;
+        return '<div id="img-' + index + '" class="slider-img" style="background-repeat:no-repeat; background-size: ' + size + ';"></div>';
     };
 
     /**
@@ -363,7 +364,15 @@ var that = this,
      * @return null
      */
     var _onAnimationComplete = function(){
+        $left = _getImageObjFromIndex(currentIndex - 1);
+        $right = _getImageObjFromIndex(currentIndex + 1);
+        console.log($right);
+        // $left.css({opacity:0});
+        $right.css({opacity:0});
         _positionImages();
+        // $left.stop().animate({opacity:1}, 400);
+        $right.stop().delay(300).animate({opacity:1}, 700);
+
         isAnimating = false;
         _setOffscreenDisplayProps();
     };
@@ -375,7 +384,9 @@ var that = this,
         $('.slider-img').each(function(i){
             var $this = $(this),
                 index = _getIndexFromImageObj($this);
+
             if(index !== currentIndex){
+                // for testing
                 $this.css('display', 'none');
             }else{
                 $this.css('display', 'block');
@@ -389,11 +400,14 @@ var that = this,
     var _positionImages = function(){
         var i = 0,
             dim = _getContainerPixelDimensions(),
+            w = dim.width,
+            h = dim.height,
             mediaCount = options.media.length,
-            half = Math.floor(mediaCount / 2);
+            half = Math.floor(mediaCount / 2),
+            $currImage = _getImageObjFromIndex(currentIndex);
 
         // set current index
-        _getImageObjFromIndex(currentIndex).transition({x:0, y:0}, 0);
+        $currImage.transition({x:0, y:0}, 0);
 
         // set position of everything after current index
         for(i; i < half; i++){
@@ -402,10 +416,13 @@ var that = this,
             if(pos >= mediaCount) pos = pos - mediaCount;
             if(neg < 0) neg = mediaCount + neg;
             // append images outward from center/currentIndex
-            var $pos = _getImageObjFromIndex(pos);
-            var $neg = _getImageObjFromIndex(neg);
-            $pos.transition({x:(i + 1) * dim.width, y:0}, 0);
-            $neg.transition({x:(i + 1) * -dim.width, y:0}, 0);
+            var $pos = _getImageObjFromIndex(pos),
+                $neg = _getImageObjFromIndex(neg),
+                posX = (i + 1) * w,
+                negX = (i + 1) * -w;
+
+            $pos.transition({x:posX, y:0}, 0);
+            $neg.transition({x:negX, y:0}, 0);
         }
     };
 
@@ -517,6 +534,9 @@ var that = this,
      * @return {jQuery Object}
      */
     var _getImageObjFromIndex = function(index){
+        // wrap
+        if(index < 0) index = options.media.length - 1;
+        if(index >= options.media.length) index = 0;
         return $('#img-' + index);
     };
 
@@ -702,10 +722,11 @@ var that = this,
         if(currX && !isAnimating){
             if(currX < (w / -2)){
                 // move to next
-                console.log('finish drag, nextImage');
+                $container.trigger('slider:onDragLeft');
                 nextImage();
             }else if(currX > (w / 2)){
                 // move to prev
+                $container.trigger('slider:onDragRight');
                 prevImage();
             }else{
                 // snap back

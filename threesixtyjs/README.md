@@ -1,4 +1,5 @@
 # threesixty
+### Version: 0.1.2
 
 ---
 
@@ -45,18 +46,21 @@ $('.threesixty').prevFrame();
 
 Step to the previous frame.
 
+#### events
+
+```javascript```
+$('.threesixty').on('down', function(){ // when user starts to drag });
+$('.threesixty').on('move', function(){ // as user is dragging });
+$('.threesixty').on('up', function(){ // when user finishes dragging});
+```
+
 ## To Do
 
-* Add mouse-wheel functionality as an option (default:off)
+* ~~Add mouse-wheel functionality as an option (default:off)~~ (not doing this, users should control this outside of plugin using nextFrame/prevFrame)
 * ~~Add arrow key functionality as an option (default:off)~~
 * ~~Expose nextFrame() & prevFrame() methods, allowing users to connect UI controls~~
 * build flick/toss physics (can this be done smoothly?)
-<<<<<<< HEAD
-* add touch/swipe support
-
-=======
 * ~~add touch/swipe support~~
->>>>>>> added touch support, bump to v0.1.0
 
 ## In the Wild
 
