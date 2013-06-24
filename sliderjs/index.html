@@ -13,8 +13,6 @@
         <script type="text/javascript" src="assets/js/dat.gui.min.js"></script>
 
         <!-- web fonts -->
-        <link rel="stylesheet" href="assets/fonts/ss-social/webfonts/ss-social.css"/>
-        <link rel="stylesheet" href="assets/fonts/ss-pika/webfonts/ss-pika.css"/>
         <link rel="stylesheet" href="assets/fonts/gibson/stylesheet.css"/>
 
         <!-- necessary css for plugin -->
@@ -101,9 +99,9 @@
     <body>
 
         <ul id="header">
-            <li><span class="icon ss-icon">picture</span><span class="title">SLIDER.JS</span></li>
-            <li><span class="icon ss-icon ss-social">github</span><a class="sub-item" href="https://github.com/nick-jonas/SliderJS">FORK ON GITHUB</a></li>
-            <li><span class="icon ss-icon">user</span><a class="sub-item" href="https://github.com/nick-jonas">AUTHOR: NICK JONAS</a></li>
+            <li><span class="title">SLIDER.JS</span></li>
+            <li><a class="sub-item" href="https://github.com/nick-jonas/SliderJS">FORK ON GITHUB</a></li>
+            <li><a class="sub-item" href="https://github.com/nick-jonas">AUTHOR: NICK JONAS</a></li>
         </ul>
 
         <div id="slider"></div>
@@ -113,12 +111,12 @@
         <script type="text/javascript">
 
             var $sl, controls, media = [
-                        'assets/img/hires/1.jpg',
-                        'assets/img/hires/2.jpg',
-                        'assets/img/hires/3.jpg',
-                        'assets/img/hires/4.jpg',
-                        'assets/img/hires/5.jpg',
-                        'assets/img/hires/6.jpg'
+                        'assets/img/hires/1.jpg'
+                        ,'assets/img/hires/2.jpg'
+                        ,'assets/img/hires/3.jpg'
+                        ,'assets/img/hires/4.jpg'
+                        ,'assets/img/hires/5.jpg'
+                        ,'assets/img/hires/6.jpg'
                     ];
 
             $(document).ready(function(){
@@ -130,7 +128,7 @@
                 this.startIndex = 0;
                 this.animationType = "slide";
                 this.easing = 'easeOutExpo';
-                this.sizeConstraint = "cover";
+                this.sizeConstraint = "contain-adjacent";
                 this.hideArrows = false;
                 this.enableKeys = true;
                 this.animationSpeed = 800;
@@ -173,7 +171,7 @@
 
                 // place slider in container
                 $sl = $('#slider').slider({
-                    'media': getImageSamples(),//media,
+                    'media': media, //getImageSamples(),//media,
                     'startIndex': controls.startIndex,
                     'easing': controls.easing,
                     'animationType': controls.animationType,
@@ -183,7 +181,9 @@
                     'animationSpeed': controls.animationSpeed,
                     'minWidth': controls.minWidth,
                     'minHeight': controls.minHeight,
-                    'draggable': controls.draggable
+                    'draggable': controls.draggable,
+                    width:1030,
+                    height:418
                 });
 
                 $sl.bind('slider:loadComplete', function(){

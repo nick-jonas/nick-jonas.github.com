@@ -5,8 +5,6 @@
         <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="js/jquery.imageloader.js"></script>
 
-        <link rel="stylesheet" href="css/webfonts/ss-social/webfonts/ss-social.css"/>
-        <link rel="stylesheet" href="css/webfonts/ss-pika/webfonts/ss-pika.css"/>
         <link rel="stylesheet" href="css/main.css">
 
     </head>
@@ -18,11 +16,11 @@
 
         <div class="subheadline">a jquery plugin for preloading images</div>
 
-        <div id="complete-icon" class="icon ss-icon">like</div>
+        <div id="complete-icon" class="icon">Done!</div>
 
         <ul id="links">
-            <li id="github"><a href="http://www.github.com/modernassembly/imageloader"><span class="icon ss-icon ss-social">octocat</span></a></li>
-            <li id="download"><a href="http://www.github.com/modernassembly/imageloader/tarball/master"><span class="icon ss-icon">downloadcloud</span></a></li>
+            <li id="github"><a href="http://www.github.com/modernassembly/imageloader">Github</a></li>
+            <li id="download"><a href="http://www.github.com/modernassembly/imageloader/tarball/master">Download</a></li>
         </ul>
         <ul id="images"></ul>
 
@@ -31,12 +29,36 @@
                 $images =$('#images');
 
             $(document).ready(function(){
+
                 $.imageloader({
-                    urls: ['images/0.jpg', 'images/1.jpg', 'images/2.jpg', 'images/3.jpg', 'images/4.jpg', 'images/5.jpg', 'images/6.jpg', 'images/7.jpg', 'images/8.jpg', 'images/9.jpg', 'images/10.jpg', 'images/11.jpg', 'images/12.jpg', 'images/13.jpg', 'images/14.jpg', 'images/15.jpg', 'images/16.jpg', 'images/17.jpg', 'images/18.jpg', 'images/19.jpg', 'images/20.jpg', 'images/21.jpg', 'images/22.jpg', 'images/23.jpg', 'images/24.jpg', 'images/25.jpg', 'images/26.jpg', 'images/27.jpg'],
+                    urls: ['images/0.jpg', 'images/1.jpg', 'images/2.jpg', 'images/3.jpg', 'images/4.jpg', 'images/5.jpg', 'images/6.jpg', 'images/7.jpg', 'images/8.jpg', 'images/9.jpg', 'images/10.jpg', 'images/11.jpg', 'images/12.jpg', 'images/13.jpg', 'images/14.jpg'],
 
                     smoothing: true,
 
-                    onComplete: function(images){
+                    onComplete: function(){
+                        $('#complete-icon').animate({opacity:1}, 600);
+                    },
+
+                    onUpdate: function(ratio, image){
+                        $line.css('width', (ratio * 100) + '%');
+                        if(image){
+                            var index = $('#images li').size();
+                            $images.append('<li id="' +  index + '"><img src="' + image + '"/></li>');
+                            $('#images li:eq(' + index + ')').delay(index * 50).animate({opacity: 1}, 1000);
+                        }
+                    },
+
+                    onError: function(err){
+                        console.log(err);
+                    }
+                });
+
+                $.imageloader({
+                    urls: ['images/15.jpg', 'images/16.jpg', 'images/17.jpg', 'images/18.jpg', 'images/19.jpg', 'images/20.jpg', 'images/21.jpg', 'images/22.jpg', 'images/23.jpg', 'images/24.jpg', 'images/25.jpg', 'images/26.jpg', 'images/27.jpg'],
+
+                    smoothing: true,
+
+                    onComplete: function(){
                         $('#complete-icon').animate({opacity:1}, 600);
                     },
 
