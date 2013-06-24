@@ -2809,19 +2809,21 @@ html:hover [class^="ss-"] {
   margin: 30px 0 0 0;
 }
 /* line 6, ../../scss/_ui.scss */
-.ui .ss-icon {
-  font-size: 4.0em;
+.ui .next {
+  font-size: 2.0em;
   position: absolute;
   display: inline-block;
   color: #CDD3D1;
   cursor: pointer;
-}
-/* line 13, ../../scss/_ui.scss */
-.ui .next {
   right: 0px;
 }
-/* line 16, ../../scss/_ui.scss */
+/* line 14, ../../scss/_ui.scss */
 .ui .prev {
+  font-size: 2.0em;
+  position: absolute;
+  display: inline-block;
+  color: #CDD3D1;
+  cursor: pointer;
   left: 0px;
 }
 

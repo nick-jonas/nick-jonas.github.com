@@ -84,7 +84,7 @@ var that = this,
                 maxPerc = perc;
             }
         });
-        return maxElem;
+        return $(maxElem);
     };
 
 
