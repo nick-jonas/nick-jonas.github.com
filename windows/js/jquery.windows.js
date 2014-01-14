@@ -15,6 +15,7 @@ var that = this,
             snapping: true,
             snapSpeed: 500,
             snapInterval: 1100,
+            sectionsToSkipArr:[],
             onScroll: function(){},
             onSnapComplete: function(){},
             onWindowEnter: function(){}
@@ -125,6 +126,8 @@ var that = this,
                 var $visibleWindow = _getCurrentWindow(), // visible window
                     scrollTo = $visibleWindow.offset().top, // top of visible window
                     completeCalled = false;
+                if($.inArray($visibleWindow.attr("id"), options.sectionsToSkipArr ) >= 0)
+                    return;
                 // animate to top of visible window
                 $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
                     if(!completeCalled){
