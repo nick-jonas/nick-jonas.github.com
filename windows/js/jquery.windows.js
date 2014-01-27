@@ -125,15 +125,25 @@ var that = this,
                 var $visibleWindow = _getCurrentWindow(), // visible window
                     scrollTo = $visibleWindow.offset().top, // top of visible window
                     completeCalled = false;
-                // animate to top of visible window
-                $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
-                    if(!completeCalled){
-                        if(t){clearTimeout(t);}
-                        t = null;
-                        completeCalled = true;
-                        options.onSnapComplete($visibleWindow);
-                    }
-                });
+                // verify if the animation need to be call
+                if(scrollTo != $(document).scrollTop()){
+                    // Add eventlistener to stop the animation if page is scrolling
+                    $("html, body").bind("scroll mousedown DOMMouseScroll mousewheel keyup", function(){
+                        $('html, body').stop();
+                    });
+                    // animate to top of visible window
+                    $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
+                        // remove eventlistener 
+                        $("html, body").unbind("scroll mousedown DOMMouseScroll mousewheel keyup");
+                       
+                        if(!completeCalled){
+                            if(t){clearTimeout(t);}
+                            t = null;
+                            completeCalled = true;
+                            options.onSnapComplete($visibleWindow);
+                        }
+                    });
+                }
             }, options.snapInterval);
         }
     };
