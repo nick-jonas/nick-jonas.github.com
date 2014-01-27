@@ -127,8 +127,15 @@ var that = this,
                     completeCalled = false;
                 // verify if the animation need to be call
                 if(scrollTo != $(document).scrollTop()){
+                    // Add eventlistener to stop the animation if page is scrolling
+                    $("html, body").bind("scroll mousedown DOMMouseScroll mousewheel keyup", function(){
+                        $('html, body').stop();
+                    });
                     // animate to top of visible window
                     $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
+                        // remove eventlistener 
+                        $("html, body").unbind("scroll mousedown DOMMouseScroll mousewheel keyup");
+                       
                         if(!completeCalled){
                             if(t){clearTimeout(t);}
                             t = null;
