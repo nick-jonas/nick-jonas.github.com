@@ -15,6 +15,7 @@ var that = this,
             snapping: true,
             snapSpeed: 500,
             snapInterval: 1100,
+            easing: 'swing',
             onScroll: function(){},
             onSnapComplete: function(){},
             onWindowEnter: function(){}
@@ -126,7 +127,7 @@ var that = this,
                     scrollTo = $visibleWindow.offset().top, // top of visible window
                     completeCalled = false;
                 // animate to top of visible window
-                $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
+                $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, options.easing, function(){
                     if(!completeCalled){
                         if(t){clearTimeout(t);}
                         t = null;
