@@ -13,8 +13,8 @@ var that = this,
         pluginName = 'windows',
         defaults = {
             snapping: true,
-            snapSpeed: 500,
-            snapInterval: 1100,
+            snapSpeed: 200,
+            snapInterval: 50,
             onScroll: function(){},
             onSnapComplete: function(){},
             onWindowEnter: function(){}
@@ -23,6 +23,7 @@ var that = this,
         $w = $(window),
         s = 0, // scroll amount
         t = null, // timeout
+        isAnimating = false,
         $windows = [];
 
     /**
@@ -69,6 +70,59 @@ var that = this,
             curTop = curPos.top - s;
         return (curTop >= screenHeight || curTop <= -screenHeight) ? false : true;
     };
+    
+    /**
+	* Scroll to section
+	* @return {this}
+    */
+    $.fn.scrollTo = function($nextWindow)
+    {	
+    	//check if this is indeed a valid object:
+    	if ($nextWindow.length < 1) {
+    		return;
+    	}
+    	//now check if this is actually a section
+    	var isSection = false;
+    	$.each ( $windows, function(i) {
+    		if ($(this).is ($nextWindow))
+    			isSection = true;
+    	});
+    	if (!isSection) return;
+    	
+    	s = $w.scrollTop();
+    	var scrollTo = $nextWindow.offset().top;
+        
+        isAnimating = true;
+        $('html:not(:animated),body:not(:animated)').animate ( 
+        	{scrollTop: scrollTo}, 
+        	{ 
+        		duration: options.snapSpeed,
+        		step: function() 
+        		{	
+        			// We want to retain all the callback fn that we cycle through on scroll:
+        			s = $w.scrollTop();
+            		options.onScroll(s);
+            	
+            		// notify on new window entering
+            		$.each ( $windows, function(i) 
+            		{
+                		var $this = $(this),
+            	    	isOnScreen = $this.isOnScreen();
+            	    	if (isOnScreen && !$this.data('onScreen'))
+            	    		options.onWindowEnter($this);
+            	    	 $this.data('onScreen', isOnScreen);
+            	 	});
+          		},
+        		complete: function() 
+        		{
+        			options.onSnapComplete($nextWindow);
+        			isAnimating = false;
+        		}
+        	}
+        );
+        
+    	return this;
+    };
 
     /**
      * Get section that is mostly visible on screen
@@ -95,6 +149,9 @@ var that = this,
      * @return null
      */
     var _onScroll = function(){
+    	if (isAnimating)
+    		return;
+    	
         s = $w.scrollTop();
 
         _snapWindow();
@@ -113,6 +170,9 @@ var that = this,
     };
 
     var _onResize = function(){
+    	if (isAnimating)
+    		return;
+    		
         _snapWindow();
     };
 
