@@ -10,7 +10,7 @@
 
 function isEmpty (object)
 {
-	if (!object || ($.isArray(object) && object.length < 1))
+	if (typeof object == 'undefined' || !object || ($.isArray(object) && object.length < 1))
 		return true;
 	return false;
 }
@@ -23,7 +23,7 @@ var that = this,
         defaults = {
             snapping: true,
             snapSpeed: 200,
-            snapInterval: 70,
+            snapInterval: 50,
             onScroll: function(){},
             onSnapComplete: function(){},
             onWindowEnter: function(){},
@@ -64,6 +64,7 @@ var that = this,
 		//Make sure that this object exists and that it's in our array of windows: 
 		if (isEmpty ($nextWindow))
 			return;
+			
 		//now check if this is actually a section
 		var isSection = false;
 		$.each ( $windows, function(i) {
@@ -105,22 +106,22 @@ var that = this,
 	}
 	$.fn.scrollUp = function()
 	{
-		var index = currentIndex - 1;
+		var scrollDownToindex = currentIndex - 1;
 		
 		// if this is top window, scroll down to bottom to complete loop
-		if (index < 0) 
-			index = $windows.length;
+		if (scrollDownToindex < 0) 
+			scrollDownToindex = $windows.length;
 		
-		$(this).scrollToIndex (index);
+		$(this).scrollToIndex (scrollDownToindex);
 	}
 	$.fn.scrollDown = function()
 	{
-		var index = currentIndex + 1;
+		var scrollDownToindex = 1 + currentIndex;
 		
 		// if this is bottom window, scroll up to top to complete loop
-		if (index > $windows.length)
-			index = 0;
-		$(this).scrollToIndex (index);
+		if (scrollDownToindex > $windows.length)
+			scrollDownToindex = 0;
+		$(this).scrollToIndex (scrollDownToindex);
 	}
 	
     /**
@@ -183,7 +184,7 @@ var that = this,
     {
     	if (index < 0 || index > $windows.length)
     		return null;
-    	return $windows[index];
+    	return $($windows[index]);
     };
     
 	/**
