@@ -62,23 +62,19 @@ var that = this,
 	{	
 		
 		//Make sure that this object exists and that it's in our array of windows: 
-		if (isEmpty ($nextWindow))
+		if (isEmpty ($nextWindow) || isAnimating)
 			return;
 			
 		//now check if this is actually a section
-		var isSection = false;
-		$.each ( $windows, function(i) {
-			if ($(this).is ($nextWindow))
-			isSection = true;
-		});
+		var isSection = ($windows.indexOf ($nextWindow.get(0)) != -1) ? true : false;
 		if (!isSection) return;
 		    	
 		s = $w.scrollTop();
 		var scrollTo = $nextWindow.offset().top;
 	    
 	    isAnimating = true;
-	    $('html:not(:animated),body:not(:animated)').animate ( 
-	    	{scrollTop: scrollTo}, 
+	    $('html:not(:animated),body:not(:animated)').animate 
+	    	( {scrollTop: scrollTo}, 
 	    	{ 
 	    		duration: options.snapSpeed,
 	    		step: function() 
@@ -102,6 +98,7 @@ var that = this,
 	};
 	$.fn.scrollToIndex = function(index)
 	{
+		console.log("scroll to index: "+index+";");
 		$(this).scrollTo (_windowAtIndex (index));
 	}
 	$.fn.scrollUp = function()
@@ -163,7 +160,8 @@ var that = this,
         {
             var $thisWindow = $(this);
             var perc = $thisWindow.ratioVisible();
-            if(Math.abs(perc) > Math.abs(maxPerc)){
+            if(Math.abs(perc) > Math.abs(maxPerc)) 
+            {
                 maxElem = $thisWindow;
                 maxPerc = perc;
             }
@@ -177,7 +175,8 @@ var that = this,
     {
     	if (isEmpty ($object))
     		return -1;
-    	return jQuery.inArray( $object, $windows );
+    		
+    	return $windows.indexOf ($object.get(0));
     };
     
     var _windowAtIndex = function (index)
@@ -202,10 +201,12 @@ var that = this,
 				// we scrolled to a new window
 				nextIndex = i;
 				options.onWindowEnter($thisWindow);
+				console.log ("Next index is "+i+". Current index is "+currentIndex);
 			} else if (prevIndex != i && !isThisWindowVisible && $thisWindow.data("onScreen") == true) {
 				// we scrolled away from this window
 				prevIndex = i;
 				options.onWindowExit($thisWindow);
+				console.log ("Previous index is "+i+". Current index is "+currentIndex);
 			}
 			$thisWindow.data ("onScreen", isThisWindowVisible);
 		});
@@ -255,6 +256,7 @@ var that = this,
 				scrollTo = $mostVisibleWindow.offset().top, // top of visible window
 				completeCalled = false;
 			currentIndex = _indexOfWindow ($mostVisibleWindow);
+			console.log("Set currentIndex to "+currentIndex+". Mostvisiblewindow id is "+$mostVisibleWindow.attr ('id'));
 			isAnimating = true;
                 
 			// animate to top of visible window
