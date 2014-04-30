@@ -4,7 +4,16 @@
  * Original author: @nick-jonas
  * Website: http://www.workofjonas.com
  * Licensed under the MIT license
+ 
+ * Fork by Jarl Robert Kristiansen
  */
+
+function isEmpty (object)
+{
+	if (typeof object == 'undefined' || !object || ($.isArray(object) && object.length < 1))
+		return true;
+	return false;
+}
 
 ;(function ( $, window, document, undefined ) {
 
@@ -13,16 +22,21 @@ var that = this,
         pluginName = 'windows',
         defaults = {
             snapping: true,
-            snapSpeed: 500,
-            snapInterval: 1100,
+            snapSpeed: 200,
+            snapInterval: 50,
             onScroll: function(){},
             onSnapComplete: function(){},
-            onWindowEnter: function(){}
+            onWindowEnter: function(){},
+            onWindowExit: function(){}
         },
         options = {},
         $w = $(window),
         s = 0, // scroll amount
         t = null, // timeout
+        currentIndex = 0,
+        prevIndex = 0,
+        nextIndex = 1,
+        isAnimating = false,
         $windows = [];
 
     /**
@@ -37,19 +51,83 @@ var that = this,
         this._defaults = defaults;
         this._name = pluginName;
         $windows.push(element);
-        var isOnScreen = $(element).isOnScreen();
-        $(element).data('onScreen', isOnScreen);
-        if(isOnScreen) options.onWindowEnter($(element));
-
+        
+        _updateWindowEvents ();
     }
-
+	/**
+	* Scroll to section
+	* @return {this}
+	*/
+	$.fn.scrollTo = function($nextWindow)
+	{	
+		
+		//Make sure that this object exists and that it's in our array of windows: 
+		if (isEmpty ($nextWindow) || isAnimating)
+			return;
+			
+		//now check if this is actually a section
+		var isSection = ($windows.indexOf ($nextWindow.get(0)) != -1) ? true : false;
+		if (!isSection) return;
+		    	
+		s = $w.scrollTop();
+		var scrollTo = $nextWindow.offset().top;
+	    
+	    isAnimating = true;
+	    $('html:not(:animated),body:not(:animated)').animate 
+	    	( {scrollTop: scrollTo}, 
+	    	{ 
+	    		duration: options.snapSpeed,
+	    		step: function() 
+	    		{	
+	    			// We want to retain all the callback fn that we cycle through on scroll:
+	    			s = $w.scrollTop();
+	        		options.onScroll(s);
+	        	
+	        		_updateWindowEvents ();
+	      		},
+	    		complete: function() 
+	    		{
+	    			options.onSnapComplete($nextWindow);
+	    			currentIndex = _indexOfWindow ($nextWindow);
+	    			isAnimating = false;
+	    		}
+	    	}
+	    );
+	    
+		return this;
+	};
+	$.fn.scrollToIndex = function(index)
+	{
+		console.log("scroll to index: "+index+";");
+		$(this).scrollTo (_windowAtIndex (index));
+	}
+	$.fn.scrollUp = function()
+	{
+		var scrollDownToindex = currentIndex - 1;
+		
+		// if this is top window, scroll down to bottom to complete loop
+		if (scrollDownToindex < 0) 
+			scrollDownToindex = $windows.length;
+		
+		$(this).scrollToIndex (scrollDownToindex);
+	}
+	$.fn.scrollDown = function()
+	{
+		var scrollDownToindex = 1 + currentIndex;
+		
+		// if this is bottom window, scroll up to top to complete loop
+		if (scrollDownToindex > $windows.length)
+			scrollDownToindex = 0;
+		$(this).scrollToIndex (scrollDownToindex);
+	}
+	
     /**
      * Get ratio of element's visibility on screen
      * @return {Number} ratio 0-1
      */
     $.fn.ratioVisible = function(){
         var s = $w.scrollTop();
-        if(!this.isOnScreen()) return 0;
+        if(!this.isVisibleOnScreen()) return 0;
         var curPos = this.offset();
         var curTop = curPos.top - s;
         var screenHeight = $w.height();
@@ -62,7 +140,7 @@ var that = this,
      * Is section currently on screen?
      * @return {Boolean}
      */
-    $.fn.isOnScreen = function(){
+    $.fn.isVisibleOnScreen = function(){
         var s = $w.scrollTop(),
             screenHeight = $w.height(),
             curPos = this.offset(),
@@ -74,13 +152,17 @@ var that = this,
      * Get section that is mostly visible on screen
      * @return {jQuery el}
      */
-    var _getCurrentWindow = $.fn.getCurrentWindow = function(){
+    var _mostVisibleWindow = $.fn.mostVisibleWindow = function()
+    {
         var maxPerc = 0,
             maxElem = $windows[0];
-        $.each($windows, function(i){
-            var perc = $(this).ratioVisible();
-            if(Math.abs(perc) > Math.abs(maxPerc)){
-                maxElem = $(this);
+        $.each($windows, function(i) 
+        {
+            var $thisWindow = $(this);
+            var perc = $thisWindow.ratioVisible();
+            if(Math.abs(perc) > Math.abs(maxPerc)) 
+            {
+                maxElem = $thisWindow;
                 maxPerc = perc;
             }
         });
@@ -89,53 +171,107 @@ var that = this,
 
 
     // PRIVATE API ----------------------------------------------------------
-
+    var _indexOfWindow = function ($object)
+    {
+    	if (isEmpty ($object))
+    		return -1;
+    		
+    	return $windows.indexOf ($object.get(0));
+    };
+    
+    var _windowAtIndex = function (index)
+    {
+    	if (index < 0 || index > $windows.length)
+    		return null;
+    	return $($windows[index]);
+    };
+    
+	/**
+	 * keep track of window events and scroll direction
+	 * @return null
+	 */
+	var _updateWindowEvents = function ()
+	{
+		$.each($windows, function(i) 
+		{
+			var $thisWindow = $(this),
+				isThisWindowVisible = $thisWindow.isVisibleOnScreen();
+			if (nextIndex != i && isThisWindowVisible && $thisWindow.data("onScreen") == false) 
+			{	
+				// we scrolled to a new window
+				nextIndex = i;
+				options.onWindowEnter($thisWindow);
+				console.log ("Next index is "+i+". Current index is "+currentIndex);
+			} else if (prevIndex != i && !isThisWindowVisible && $thisWindow.data("onScreen") == true) {
+				// we scrolled away from this window
+				prevIndex = i;
+				options.onWindowExit($thisWindow);
+				console.log ("Previous index is "+i+". Current index is "+currentIndex);
+			}
+			$thisWindow.data ("onScreen", isThisWindowVisible);
+		});
+	};
+	
     /**
      * Window scroll event handler
      * @return null
      */
-    var _onScroll = function(){
+    var _onScroll = function()
+    {
+    	if (isAnimating)
+    		return;
+    	
         s = $w.scrollTop();
 
         _snapWindow();
 
         options.onScroll(s);
 
-        // notify on new window entering
-        $.each($windows, function(i){
-            var $this = $(this),
-                isOnScreen = $this.isOnScreen();
-            if(isOnScreen){
-                if(!$this.data('onScreen')) options.onWindowEnter($this);
-            }
-            $this.data('onScreen', isOnScreen);
-        });
+        // trigger events on window entering / exiting
+        _updateWindowEvents ();
     };
 
-    var _onResize = function(){
+    var _onResize = function()
+    {
+    	if (isAnimating)
+    		return;
+    		
         _snapWindow();
     };
 
-    var _snapWindow = function(){
+    var _snapWindow = function()
+    {
+    	if (isAnimating)
+    		return;
+    		
         // clear timeout if exists
-        if(t){clearTimeout(t);}
+        if (t) clearTimeout(t);
         // check for when user has stopped scrolling, & do stuff
-        if(options.snapping){
-            t = setTimeout(function(){
-                var $visibleWindow = _getCurrentWindow(), // visible window
-                    scrollTo = $visibleWindow.offset().top, // top of visible window
-                    completeCalled = false;
-                // animate to top of visible window
-                $('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function(){
-                    if(!completeCalled){
-                        if(t){clearTimeout(t);}
-                        t = null;
-                        completeCalled = true;
-                        options.onSnapComplete($visibleWindow);
-                    }
-                });
-            }, options.snapInterval);
-        }
+        if (!options.snapping)
+        	return;
+        	
+		t = setTimeout (function()
+		{
+	        var $mostVisibleWindow = _mostVisibleWindow(), // snap to most visible window
+				scrollTo = $mostVisibleWindow.offset().top, // top of visible window
+				completeCalled = false;
+			currentIndex = _indexOfWindow ($mostVisibleWindow);
+			console.log("Set currentIndex to "+currentIndex+". Mostvisiblewindow id is "+$mostVisibleWindow.attr ('id'));
+			isAnimating = true;
+                
+			// animate to top of visible window
+			$('html:not(:animated),body:not(:animated)').animate({scrollTop: scrollTo }, options.snapSpeed, function()
+			{
+				if (completeCalled)
+					return;
+				if (t) clearTimeout(t);
+              	t = null;
+				completeCalled = true;
+				isAnimating = false;
+				options.onSnapComplete($mostVisibleWindow);
+			});
+		}, options.snapInterval);
+        
     };
 
 
